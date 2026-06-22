@@ -1,6 +1,6 @@
 [package]
 name = "graveyard-slide"
-version = "1.0.0"
+version = "0.1.0"
 description = "Graveyard Slide"
 edition = "2021"
 
