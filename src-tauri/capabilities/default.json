@@ -5,7 +5,8 @@
   "windows": ["main"],
   "permissions": [
     "updater:default",
-    "dialog:default",
+    "dialog:allow-ask",
+    "dialog:allow-message",
     "process:default"
   ]
 }
