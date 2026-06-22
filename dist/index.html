@@ -4747,5 +4747,23 @@
   });
   window.addEventListener('contextmenu', (e) => e.preventDefault());
 </script>
+<script>
+  // F11 toggles fullscreen <-> windowed using Tauri's native window API
+  // (the browser's own requestFullscreen() doesn't reliably hide the
+  // OS title bar inside Tauri's webview, so we go through Tauri directly)
+  window.addEventListener('keydown', async (e) => {
+    if (e.key === 'F11') {
+      e.preventDefault();
+      try {
+        const { getCurrentWindow } = window.__TAURI__.window;
+        const win = getCurrentWindow();
+        const isFullscreen = await win.isFullscreen();
+        await win.setFullscreen(!isFullscreen);
+      } catch (err) {
+        console.error('Fullscreen toggle failed:', err);
+      }
+    }
+  });
+</script>
 </body>
 </html>
