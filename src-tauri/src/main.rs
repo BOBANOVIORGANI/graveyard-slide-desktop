@@ -22,9 +22,9 @@ fn main() {
         builder.menu(|handle| {
             let about_metadata = AboutMetadata {
                 version: Some("1.0.0".into()),
-                short_version: Some("Build 1".into()),
+                short_version: Some("V1".into()),
                 copyright: Some("© 2026 Marin Golub".into()),
-                credits: Some("A game about sliding through graveyards.".into()),
+                credits: Some("Abstract survival. Navigate intense modes, utilize power-ups, and customize your experience in this high-speed avoidance game.".into()),
                 ..Default::default()
             };
 
@@ -33,7 +33,7 @@ fn main() {
                 "Graveyard Slide",
                 true,
                 &[
-                    &PredefinedMenuItem::about(handle, Some("About This Madness"), Some(about_metadata))?,
+                    &PredefinedMenuItem::about(handle, Some("About The Game"), Some(about_metadata))?,
                     &PredefinedMenuItem::separator(handle)?,
                     &PredefinedMenuItem::quit(handle, Some("Get Me Out"))?,
                 ],
