@@ -67,11 +67,18 @@ jobs:
           chmod +x scripts/build-dmg.sh
           ./scripts/build-dmg.sh
 
+      - name: Get app version (macOS only)
+        if: matrix.platform == 'macos-latest'
+        id: app_version
+        run: |
+          VERSION=$(grep '"version"' src-tauri/tauri.conf.json | head -1 | sed -E 's/.*"version": *"([^"]+)".*/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Re-upload styled DMG to release (macOS only)
         if: matrix.platform == 'macos-latest'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: app-v${{ steps.app_version.outputs.version }}
           files: src-tauri/target/release/bundle/dmg/*.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
