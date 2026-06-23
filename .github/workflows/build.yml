@@ -29,6 +29,19 @@ jobs:
       - name: Install JS deps
         run: npm install
 
+      - name: Set up Python (macOS only, for custom DMG step)
+        if: matrix.platform == 'macos-latest'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # tauri-action builds everything as normal, including its own
+      # (broken-background) DMG on macOS. We let it run as-is because
+      # the .app.tar.gz + .sig it produces is what the real in-app
+      # auto-updater actually uses — the DMG itself is only ever used
+      # for a fresh manual install, never read by the updater. So the
+      # only thing wrong with the default DMG is cosmetic (no custom
+      # background), which we fix by overwriting it afterward below.
       - name: Build app
         uses: tauri-apps/tauri-action@v0
         env:
@@ -41,3 +54,24 @@ jobs:
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
+
+      # Overwrite the plain DMG that tauri-action just built (and
+      # already uploaded to the release) with our styled version using
+      # dmgbuild, then re-upload it under the exact same filename so it
+      # replaces the asset on the draft release. This DMG is NOT part
+      # of the updater signature chain, so no re-signing is needed here.
+      - name: Rebuild DMG with custom background (macOS only)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          python3 -m pip install dmgbuild
+          chmod +x scripts/build-dmg.sh
+          ./scripts/build-dmg.sh
+
+      - name: Re-upload styled DMG to release (macOS only)
+        if: matrix.platform == 'macos-latest'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: src-tauri/target/release/bundle/dmg/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
