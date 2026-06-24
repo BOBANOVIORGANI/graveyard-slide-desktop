@@ -343,32 +343,6 @@
     flex-grow: 1;
   }
 
-  .btn-close {
-    position: absolute;
-    top: 25px;
-    right: 25px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    padding: 0;
-    margin: 0;
-    z-index: 100;
-    color: rgba(255,255,255,0.5);
-  }
-  .btn-close:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.3);
-    color: #fff;
-    transform: rotate(90deg);
-  }
-
   /* MODE CARDS */
   .modes-grid {
     display: grid;
@@ -842,21 +816,133 @@
     background-size: 180px 180px, 260px 260px;
   }
 
-  /* Mobile Restriction */
-  #mobile-warning {
-    display: none;
+  /* ============== OVERLAY SYSTEM ==============
+     Shared by: quit-confirm, update-available, updating, update-done.
+     Sits above everything (#ui-layer is z-index:10). */
+  .overlay-backdrop {
     position: fixed;
     inset: 0;
-    background: #06080f;
-    z-index: 1000;
-    flex-direction: column;
+    z-index: 500;
+    background: rgba(3, 4, 8, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: none;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 30px;
+    padding: 24px;
+    animation: overlay-in 220ms ease both;
   }
-  @media (pointer: coarse) or (max-width: 768px) {
-    #mobile-warning { display: flex; }
+  .overlay-backdrop.active { display: flex; }
+  @keyframes overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .overlay-card {
+    width: min(420px, 100%);
+    background: rgba(10, 12, 19, 0.92);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 36px 32px;
+    text-align: center;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.04);
+    animation: overlay-card-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes overlay-card-in {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .overlay-card h2 {
+    font-size: 28px;
+    margin-bottom: 0.4em;
+  }
+  .overlay-card p.overlay-msg {
+    font-size: 12px;
+    line-height: 1.7;
+    color: rgba(220, 230, 245, 0.68);
+    margin: 0 0 28px 0;
+    letter-spacing: 0.02em;
+  }
+  .overlay-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .overlay-actions button {
+    flex: 1;
+    margin: 0;
+  }
+  .overlay-version-tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--cyan);
+    border: 1px solid rgba(158, 231, 255, 0.32);
+    background: rgba(158, 231, 255, 0.08);
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-bottom: 18px;
+    text-transform: uppercase;
+  }
+
+  /* Update progress bar - reuses the loading-screen visual language */
+  .overlay-progress-container {
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.05);
+    margin: 28px 0 10px 0;
+    position: relative;
+  }
+  .overlay-progress-container::before,
+  .overlay-progress-container::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    width: 1px;
+    height: 10px;
+    background: rgba(255,255,255,0.24);
+  }
+  .overlay-progress-container::before { left: 0; }
+  .overlay-progress-container::after { right: 0; }
+  #update-progress-bar {
+    position: absolute;
+    left: 0; top: 0; height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #9ee7ff, #fff, #ffd773);
+    box-shadow: 0 0 20px rgba(158,231,255,0.75), 0 0 40px rgba(255,255,255,0.35);
+    transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  #update-progress-label {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: rgba(180, 200, 230, 0.55);
+    text-transform: uppercase;
+  }
+
+  /* Changelog list inside the "What's New" card */
+  .changelog-body {
+    max-height: 260px;
+    overflow-y: auto;
+    text-align: left;
+    font-size: 12px;
+    line-height: 1.7;
+    color: rgba(220, 230, 245, 0.78);
+    margin-bottom: 28px;
+    padding-right: 4px;
+  }
+  .changelog-body::-webkit-scrollbar { width: 5px; }
+  .changelog-body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.12);
+    border-radius: 4px;
+  }
+  .changelog-body p { margin: 0 0 0.8em 0; }
+  .changelog-body ul { margin: 0 0 0.8em 0; padding-left: 1.2em; }
+  .changelog-body li { margin-bottom: 0.3em; }
+  .changelog-body strong { color: #fff; }
+  .changelog-body code {
+    background: rgba(255,255,255,0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
   }
 </style>
 </head>
@@ -866,10 +952,51 @@
 <div id="vignette"></div>
 <div id="grain"></div>
 
-<div id="mobile-warning">
-    <h1>Graveyard Slide</h1>
-    <p class="subtitle" style="color: #ffaa88;">PC EXCLUSIVE</p>
-    <p style="font-size: 12px; color: #ccc; margin-top: 20px;">This game requires mouse and keyboard precision for the optimal experience.</p>
+<!-- Quit confirmation - shown for Esc (in-game or main menu) and window close -->
+<div id="overlay-quit" class="overlay-backdrop">
+  <div class="overlay-card">
+    <h2 id="quit-overlay-title">Quit to Menu?</h2>
+    <p class="overlay-msg" id="quit-overlay-msg">Your current run will be lost.</p>
+    <div class="overlay-actions">
+      <button id="quit-cancel-btn" onclick="closeQuitOverlay()">CANCEL</button>
+      <button class="button-primary" id="quit-confirm-btn" onclick="confirmQuitOverlay()">QUIT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Update available - replaces the native dialog -->
+<div id="overlay-update-available" class="overlay-backdrop">
+  <div class="overlay-card">
+    <span class="overlay-version-tag" id="update-version-tag">V0.0.0</span>
+    <h2>Update Available</h2>
+    <p class="overlay-msg">A new version of Graveyard Slide is ready to install. The game will be unavailable for a moment while it updates.</p>
+    <div class="overlay-actions">
+      <button id="update-later-btn" onclick="dismissUpdateAvailable()">LATER</button>
+      <button class="button-primary" onclick="beginUpdateDownload()">UPDATE NOW</button>
+    </div>
+  </div>
+</div>
+
+<!-- Updating - blocking, no way to dismiss until done -->
+<div id="overlay-updating" class="overlay-backdrop">
+  <div class="overlay-card">
+    <h2>Updating...</h2>
+    <p class="overlay-msg">Please don't close the game while this finishes.</p>
+    <div class="overlay-progress-container"><div id="update-progress-bar"></div></div>
+    <p id="update-progress-label">PREPARING...</p>
+  </div>
+</div>
+
+<!-- Update complete / What's New -->
+<div id="overlay-update-done" class="overlay-backdrop">
+  <div class="overlay-card" style="width: min(480px, 100%);">
+    <span class="overlay-version-tag" id="whats-new-version-tag">V0.0.0</span>
+    <h2>Update Complete</h2>
+    <div class="changelog-body" id="whats-new-body">Loading changelog...</div>
+    <div class="overlay-actions">
+      <button class="button-primary" onclick="closeWhatsNewOverlay()" style="flex: none; padding-inline: 40px;">CONTINUE</button>
+    </div>
+  </div>
 </div>
 
 <div id="ui-layer">
@@ -878,6 +1005,9 @@
     <h1>Graveyard Slide</h1>
     <p class="subtitle" id="loading-status">LOADING ASSETS...</p>
     <div class="loader-bar-container"><div id="loader-progress"></div></div>
+    <p style="font-size: 9px; letter-spacing: 0.22em; color: rgba(180, 200, 230, 0.32); text-transform: uppercase; margin-top: 28px;">
+      Backspace to quit / return
+    </p>
   </div>
 
   <div id="hud-top"><span id="coin-amount">0</span></div>
@@ -888,7 +1018,6 @@
     <div class="run-chip"><span>Combo</span><strong id="run-combo">x1</strong></div>
     <div class="run-chip"><span>Status</span><strong id="run-status">CLEAR</strong></div>
   </div>
-  <button id="return-btn" onclick="nav('main')" style="position:absolute;top:20px;left:20px;display:none;z-index:20;">RETURN</button>
 
   <div id="screen-main" class="screen">
     <h1 id="main-title">Graveyard Slide</h1>
@@ -912,7 +1041,6 @@
 
   <div id="screen-modes" class="screen">
     <div class="glass-panel modes-panel">
-      <button class="btn-close" onclick="nav('main')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       <div class="glass-header">
         <h2>SELECT RUN</h2>
       </div>
@@ -982,7 +1110,6 @@
 
   <div id="screen-shop" class="screen">
     <div class="glass-panel">
-      <button class="btn-close" onclick="nav('main')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       <div class="glass-header">
         <h2>ARMORY</h2>
         <div class="shop-tabs">
@@ -999,7 +1126,6 @@
 
   <div id="screen-impossible" class="screen">
     <div class="glass-panel" style="max-width: 500px; padding: 40px;">
-      <button class="btn-close" onclick="nav('main')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       <h2 style="color: #f7fbff; margin-bottom: 10px;">HARMONY</h2>
       <p class="subtitle" style="color: #7dffd9; margin-bottom: 30px;">LEVEL: RESONANCE</p>
       <p style="font-size: 12px; color: #d9e7ef; margin-bottom: 40px; line-height: 1.6;">A final pattern bends the arena into chords, echoes, and moving gaps. Hold the line until the signal resolves.</p>
@@ -1012,7 +1138,6 @@
 
   <div id="screen-dead" class="screen">
     <div class="glass-panel" style="max-width: 600px; align-items: center; padding: 60px 40px;">
-      <button class="btn-close" onclick="nav('main')"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       <h1 id="dead-score" style="font-size: 80px; margin-bottom: 0.1em;">0</h1>
       <p class="subtitle" id="dead-subtitle" style="margin-bottom: 2.5rem;">BEST 0</p>
 
@@ -1456,13 +1581,14 @@
     document.getElementById('ui-layer').style.pointerEvents = 'auto';
     document.getElementById('screen-' + screenName).classList.add('active');
     state = 'menu';
+    botplay = false; // botplay is a transient demo state - never let it
+                      // persist once we're back at any menu screen, or
+                      // every !botplay check elsewhere in the game (and
+                      // the Backspace handler) stays silently broken
+                      // for the rest of the session.
     canvas.style.cursor = 'default';
     scoreHud.classList.remove('show');
     if (runHud) runHud.classList.remove('show');
-    const returnBtn = document.getElementById('return-btn');
-    returnBtn.textContent = 'RETURN';
-    returnBtn.onclick = () => nav('main');
-    returnBtn.style.display = 'none';
     
     if(screenName === 'main' || screenName === 'modes' || screenName === 'shop') playMusic('main');
     if(screenName === 'shop') renderShop();
@@ -1728,11 +1854,31 @@
   window.addEventListener('keydown', e => {
     const key = e.key.toLowerCase();
     keysHeld[key] = true;
-    if (e.key === 'Escape' || (key === 'e' && botplay)) {
-      if (state === 'playing' || state === 'dead' || state === 'dying') {
-          nav('main');
-      }
+
+    if (e.key === 'Backspace') {
+      // Always block the default Backspace behavior (some browsers/
+      // webviews treat it as "navigate back" depending on what has
+      // focus) so it can never compete with our own handling below.
+      e.preventDefault();
     }
+
+    if (botplay && (key === 'e' || e.key === 'Backspace')) {
+      // botplay demo skip - exits straight to main, no confirmation
+      // needed since it's not a real run. E is the original key;
+      // Backspace also works here so it's consistent with the rest
+      // of the game's "Backspace always backs out" behavior.
+      if (state === 'playing' || state === 'dead' || state === 'dying') {
+        nav('main');
+      }
+    } else if (e.key === 'Backspace') {
+      // Backspace, not Escape: macOS reserves Escape to exit true
+      // fullscreen at the OS level, and a website/app cannot intercept
+      // or preventDefault that - it always exits fullscreen first
+      // regardless of our own keydown handling. Backspace has no such
+      // conflict and isn't used anywhere else in this game.
+      handleQuitKey();
+    }
+
     if (key === 'k' && boss) {
         const target = threats.find(t=>t.isSentinel && !t.dead);
         if (target) {
@@ -2257,11 +2403,6 @@
         runHud.classList.add('show');
     }
     
-    const returnBtn = document.getElementById('return-btn');
-    returnBtn.textContent = 'RETURN';
-    returnBtn.onclick = () => nav('main');
-    returnBtn.style.pointerEvents = 'auto';
-    returnBtn.style.display = 'none';
     if(botplay) {
         playMusic('botplay');
     } else {
@@ -2549,7 +2690,6 @@
     
     scoreHud.classList.remove('show');
     if (runHud) runHud.classList.remove('show');
-    document.getElementById('return-btn').style.display = 'none';
     document.getElementById('screen-dead').classList.add('active');
   }
 
@@ -4721,23 +4861,264 @@
 })();
 </script>
 <script>
+  // ============== QUIT CONFIRMATION SYSTEM ==============
+  // Bound to Backspace, not Escape - macOS reserves Escape to exit true
+  // fullscreen at the OS level and that can't be intercepted from JS,
+  // so Backspace avoids the conflict entirely.
+  //
+  // Rules:
+  //   - mid-run (state === 'playing' or 'dying') -> does nothing at all,
+  //     no popup, no pause. There is no way to quit out of an active run.
+  //   - on the dead/results screen   -> straight to main, nothing to lose
+  //   - on a sub-menu (modes/shop/impossible) -> straight back to main
+  //   - on the main menu itself      -> "Quit Game?" overlay
+  //   - window close button (native X) -> same "Quit Game?" overlay
+  //
+  // Screen detection reads the DOM directly (.screen.active) rather
+  // than the currentScreen variable, since that variable is declared
+  // with `let` further down the file and isn't reliably initialized
+  // by the time this can fire - DOM state is always accurate.
+
+  let quitOverlayMode = 'menu'; // 'menu' | 'app'
+
+  function getActiveScreenName() {
+    const activeScreen = document.querySelector('.screen.active');
+    if (!activeScreen) return null;
+    return activeScreen.id.replace('screen-', '');
+  }
+
+  window.handleQuitKey = function() {
+    // Don't stack overlays - if one's already open, Backspace does
+    // nothing here (Cancel/Quit buttons handle closing it).
+    if (document.getElementById('overlay-quit').classList.contains('active')) return;
+    if (document.getElementById('overlay-update-available').classList.contains('active')) return;
+    if (document.getElementById('overlay-updating').classList.contains('active')) return;
+    if (document.getElementById('overlay-update-done').classList.contains('active')) return;
+
+    // Mid-run: do nothing at all.
+    if (state === 'playing' || state === 'dying') return;
+
+    const activeScreen = getActiveScreenName();
+
+    if (activeScreen === 'dead') {
+      nav('main');
+    } else if (activeScreen === 'main') {
+      openQuitOverlay('app');
+    } else if (activeScreen) {
+      // any other sub-menu screen (modes, shop, impossible) - just back out
+      nav('main');
+    }
+  };
+
+  function openQuitOverlay(mode) {
+    quitOverlayMode = mode;
+    const title = document.getElementById('quit-overlay-title');
+    const msg = document.getElementById('quit-overlay-msg');
+    const confirmBtn = document.getElementById('quit-confirm-btn');
+    if (mode === 'app') {
+      title.textContent = 'Quit Game?';
+      msg.textContent = "You're about to exit Graveyard Slide.";
+      confirmBtn.textContent = 'QUIT GAME';
+    } else {
+      title.textContent = 'Quit to Menu?';
+      msg.textContent = 'Your current run will be lost.';
+      confirmBtn.textContent = 'QUIT';
+    }
+    document.getElementById('overlay-quit').classList.add('active');
+  }
+  window.closeQuitOverlay = function() {
+    document.getElementById('overlay-quit').classList.remove('active');
+  };
+  let quitConfirmedByUser = false;
+
+  window.confirmQuitOverlay = async function() {
+    document.getElementById('overlay-quit').classList.remove('active');
+    if (quitOverlayMode === 'app') {
+      quitConfirmedByUser = true;
+      try {
+        await window.__TAURI__.window.getCurrentWindow().close();
+      } catch (err) {
+        console.error('Window close failed:', err);
+      }
+    } else {
+      nav('main');
+    }
+  };
+
+  // Intercept the native window close button (red/X) so it goes through
+  // the same confirmation instead of closing instantly.
   window.addEventListener('DOMContentLoaded', async () => {
+    if (!window.__TAURI__) return; // not running inside the Tauri app (e.g. browser preview)
+    try {
+      const win = window.__TAURI__.window.getCurrentWindow();
+      await win.onCloseRequested((event) => {
+        if (quitConfirmedByUser) {
+          // they already clicked "Quit Game" in our own overlay - let
+          // this go through instead of looping back into the overlay
+          return;
+        }
+        event.preventDefault();
+        openQuitOverlay('app');
+      });
+    } catch (err) {
+      console.error('Could not attach close-requested listener:', err);
+    }
+  });
+</script>
+<script>
+  // ============== CUSTOM UPDATE FLOW ==============
+  // Replaces the native OS dialog with our own themed overlays:
+  //   1. overlay-update-available - "Update available, install now?"
+  //   2. overlay-updating          - blocking progress bar (real %, from
+  //                                  the updater's own download events)
+  //   3. overlay-update-done       - "What's New" pulling real release
+  //                                  notes from the GitHub API
+  //
+  // GITHUB_REPO must match where releases are actually published.
+  const GITHUB_REPO = 'BOBANOVIORGANI/graveyard-slide-desktop';
+
+  let pendingUpdate = null;
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    if (!window.__TAURI__) return; // not running inside the Tauri app (e.g. browser preview)
     try {
       const update = await window.__TAURI__.updater.check();
       if (update) {
-        const yes = await window.__TAURI__.dialog.ask(
-          `Version ${update.version} is available. Update now?`,
-          { title: 'Update Available', kind: 'info', okLabel: 'Update', cancelLabel: 'Later' }
-        );
-        if (yes) {
-          await update.downloadAndInstall();
-          await window.__TAURI__.process.relaunch();
-        }
+        pendingUpdate = update;
+        document.getElementById('update-version-tag').textContent = `V${update.version}`;
+        document.getElementById('overlay-update-available').classList.add('active');
       }
     } catch (err) {
       console.error('Update check failed:', err);
     }
   });
+
+  window.dismissUpdateAvailable = function() {
+    document.getElementById('overlay-update-available').classList.remove('active');
+  };
+
+  window.beginUpdateDownload = async function() {
+    if (!pendingUpdate) return;
+    document.getElementById('overlay-update-available').classList.remove('active');
+    document.getElementById('overlay-updating').classList.add('active');
+
+    const progressBar = document.getElementById('update-progress-bar');
+    const progressLabel = document.getElementById('update-progress-label');
+    let downloaded = 0;
+    let contentLength = 0;
+
+    try {
+      await pendingUpdate.downloadAndInstall((event) => {
+        switch (event.event) {
+          case 'Started':
+            contentLength = event.data.contentLength || 0;
+            progressLabel.textContent = 'STARTING DOWNLOAD...';
+            break;
+          case 'Progress':
+            downloaded += event.data.chunkLength;
+            if (contentLength > 0) {
+              const pct = Math.min(100, Math.round((downloaded / contentLength) * 100));
+              progressBar.style.width = pct + '%';
+              progressLabel.textContent = `DOWNLOADING... ${pct}%`;
+            } else {
+              progressLabel.textContent = 'DOWNLOADING...';
+            }
+            break;
+          case 'Finished':
+            progressBar.style.width = '100%';
+            progressLabel.textContent = 'INSTALLING...';
+            break;
+        }
+      });
+
+      // Stash the version we just updated to, so after relaunch we know
+      // to show the "What's New" screen for it (see check below).
+      try {
+        localStorage.setItem('graveyard_pending_whats_new', pendingUpdate.version);
+      } catch (e) { /* non-fatal if storage write fails */ }
+
+      await window.__TAURI__.process.relaunch();
+    } catch (err) {
+      console.error('Update failed:', err);
+      progressLabel.textContent = 'UPDATE FAILED - RESTART TO RETRY';
+    }
+  };
+
+  // After relaunching post-update, show the changelog once.
+  window.addEventListener('DOMContentLoaded', async () => {
+    let pendingVersion = null;
+    try {
+      pendingVersion = localStorage.getItem('graveyard_pending_whats_new');
+    } catch (e) { /* ignore */ }
+    if (!pendingVersion) return;
+
+    try {
+      localStorage.removeItem('graveyard_pending_whats_new');
+    } catch (e) { /* ignore */ }
+
+    document.getElementById('whats-new-version-tag').textContent = `V${pendingVersion}`;
+    const bodyEl = document.getElementById('whats-new-body');
+    document.getElementById('overlay-update-done').classList.add('active');
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
+      if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
+      const data = await res.json();
+      bodyEl.innerHTML = renderChangelog(data.body || 'No release notes were provided for this update.');
+    } catch (err) {
+      console.error('Failed to fetch release notes:', err);
+      bodyEl.textContent = "Couldn't load the changelog, but the update installed successfully.";
+    }
+  });
+
+  window.closeWhatsNewOverlay = function() {
+    document.getElementById('overlay-update-done').classList.remove('active');
+  };
+
+  // Minimal, safe markdown-ish renderer for GitHub release note bodies.
+  // Handles the common cases (headings, bullet lists, bold, inline code,
+  // line breaks) without pulling in a full markdown library. Escapes
+  // HTML first so release note text can never inject markup.
+  function renderChangelog(raw) {
+    const escapeHtml = (s) => s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    const lines = escapeHtml(raw).split('\n');
+    let html = '';
+    let inList = false;
+
+    for (let line of lines) {
+      line = line.trim();
+      if (line === '') {
+        if (inList) { html += '</ul>'; inList = false; }
+        continue;
+      }
+      const bullet = line.match(/^[-*]\s+(.*)/);
+      if (bullet) {
+        if (!inList) { html += '<ul>'; inList = true; }
+        html += `<li>${inlineFormat(bullet[1])}</li>`;
+        continue;
+      }
+      if (inList) { html += '</ul>'; inList = false; }
+
+      const heading = line.match(/^#{1,6}\s+(.*)/);
+      if (heading) {
+        html += `<p><strong>${inlineFormat(heading[1])}</strong></p>`;
+      } else {
+        html += `<p>${inlineFormat(line)}</p>`;
+      }
+    }
+    if (inList) html += '</ul>';
+    return html || '<p>No changes listed for this update.</p>';
+  }
+
+  function inlineFormat(text) {
+    return text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/`(.+?)`/g, '<code>$1</code>');
+  }
 </script>
 <script>
   window.addEventListener('keydown', (e) => {
@@ -4746,24 +5127,6 @@
     }
   });
   window.addEventListener('contextmenu', (e) => e.preventDefault());
-</script>
-<script>
-  // F11 toggles fullscreen <-> windowed using Tauri's native window API
-  // (the browser's own requestFullscreen() doesn't reliably hide the
-  // OS title bar inside Tauri's webview, so we go through Tauri directly)
-  window.addEventListener('keydown', async (e) => {
-    if (e.key === 'F11') {
-      e.preventDefault();
-      try {
-        const { getCurrentWindow } = window.__TAURI__.window;
-        const win = getCurrentWindow();
-        const isFullscreen = await win.isFullscreen();
-        await win.setFullscreen(!isFullscreen);
-      } catch (err) {
-        console.error('Fullscreen toggle failed:', err);
-      }
-    }
-  });
 </script>
 </body>
 </html>

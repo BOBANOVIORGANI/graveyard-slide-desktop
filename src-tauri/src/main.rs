@@ -7,7 +7,7 @@ use tauri::menu::{AboutMetadata, Menu, PredefinedMenuItem, Submenu};
 
 fn main() {
     let builder = tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+        
         .plugin(tauri_plugin_process::init())
         .setup(|app| {
             // Updater needs to be registered inside setup, gated to desktop
