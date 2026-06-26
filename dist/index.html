@@ -696,14 +696,45 @@
   }
 
   .performance-toggle {
-    margin-top: 12px;
-    padding: 8px 12px 8px 16px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 12px;
-    border-radius: 2px;
-    color: rgba(225,235,255,0.7);
-    background: rgba(5, 7, 12, 0.28);
+    outline: none;
+  }
+  .performance-toggle .toggle-track {
+    width: 38px;
+    height: 20px;
+    padding: 2px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.14);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .performance-toggle .toggle-knob {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.82);
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .performance-toggle.active .toggle-track {
+    background: rgba(158,231,255,0.2);
+    border-color: rgba(158,231,255,0.45);
+  }
+  .performance-toggle.active .toggle-knob {
+    transform: translateX(18px);
+    background: #9ee7ff;
+    box-shadow: 0 0 12px rgba(158,231,255,0.7);
+  }
+
+  .settings-card {
+    width: min(360px, 100%); /* Shrunk to remove extra blank space */
+    padding: 32px 30px;
   }
   .settings-row {
     display: flex;
@@ -750,6 +781,91 @@
     transform: translateX(18px);
     background: #9ee7ff;
     box-shadow: 0 0 12px rgba(158,231,255,0.7);
+  }
+
+  /* Settings overlay - grouped sections, each with a small caps-locked
+     label, reusing .performance-toggle for on/off rows and a custom
+     slider style for volume. */
+  .settings-card {
+    width: min(440px, 100%);
+  }
+  .settings-section {
+    margin-bottom: 22px;
+    text-align: left;
+  }
+  .settings-section:last-child {
+    margin-bottom: 0;
+  }
+  .settings-section-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: rgba(158, 231, 255, 0.6);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .settings-row-full {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .settings-row-full:last-child {
+    margin-bottom: 0;
+  }
+  .settings-row-full .performance-toggle {
+    margin: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .settings-label-text {
+    font-size: 12px;
+    color: rgba(220, 230, 245, 0.78);
+    letter-spacing: 0.04em;
+    min-width: 70px;
+  }
+  .volume-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .volume-slider-row input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 4px;
+    outline: none;
+  }
+  .volume-slider-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #9ee7ff;
+    box-shadow: 0 0 10px rgba(158,231,255,0.6);
+    cursor: pointer;
+  }
+  .volume-slider-row input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: none;
+    border-radius: 50%;
+    background: #9ee7ff;
+    box-shadow: 0 0 10px rgba(158,231,255,0.6);
+    cursor: pointer;
+  }
+  .volume-value-label {
+    min-width: 38px;
+    text-align: right;
+    font-size: 11px;
+    color: rgba(158, 231, 255, 0.85);
+  }
+  .settings-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 18px 0;
   }
   body.performance-mode #grain {
     display: none;
@@ -884,6 +1000,59 @@
     text-transform: uppercase;
   }
 
+  /* Pause - intentionally minimal, no card/buttons. Backdrop dims the
+     frozen frame behind it; the label just pulses gently to read as
+     "waiting", not as an action that needs a click. */
+  #overlay-paused h2 {
+    font-size: 13px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(230, 238, 250, 0.82);
+    animation: paused-pulse 2.2s ease-in-out infinite;
+    margin-top: 22px;
+  }
+  @keyframes paused-pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+
+  /* Ring drawn directly at the ball's frozen screen position, sized to
+     match UNPAUSE_RADIUS in JS, so the player can see exactly how
+     close they need to be to resume. Brightens once the cursor is
+     actually inside it, before P is even pressed. */
+  #unpause-ring {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border: 1px solid rgba(158, 231, 255, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    box-shadow: 0 0 24px rgba(158, 231, 255, 0.12) inset;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  #unpause-ring.in-range {
+    border-color: rgba(125, 255, 217, 0.85);
+    box-shadow: 0 0 28px rgba(125, 255, 217, 0.35) inset, 0 0 16px rgba(125, 255, 217, 0.25);
+  }
+
+  #overlay-paused-hint {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: #ffb38a;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  #overlay-paused-hint.show {
+    opacity: 1;
+  }
+
   /* Update progress bar - reuses the loading-screen visual language */
   .overlay-progress-container {
     width: 100%;
@@ -952,6 +1121,15 @@
 <div id="vignette"></div>
 <div id="grain"></div>
 
+<!-- Pause - P toggles. No card, no buttons; just a label over the
+     frozen frame. Same key resumes, but only once the cursor is back
+     near the ball - the ring shows exactly how close is close enough. -->
+<div id="overlay-paused" class="overlay-backdrop" style="background: rgba(3, 4, 8, 0.55); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); flex-direction: column;">
+  <div id="unpause-ring"></div>
+  <h2>PAUSED</h2>
+  <p id="overlay-paused-hint">MOVE YOUR CURSOR BACK TO THE BALL TO RESUME</p>
+</div>
+
 <!-- Quit confirmation - shown for Esc (in-game or main menu) and window close -->
 <div id="overlay-quit" class="overlay-backdrop">
   <div class="overlay-card">
@@ -962,6 +1140,58 @@
       <button class="button-primary" id="quit-confirm-btn" onclick="confirmQuitOverlay()">QUIT</button>
     </div>
   </div>
+</div>
+
+<!-- Settings - grouped sections, opened from the main menu -->
+<div id="overlay-settings" class="overlay-backdrop">
+  <div class="overlay-card settings-card">
+    <h2 style="margin-bottom: 22px;">Settings</h2>
+
+    <div class="settings-section">
+      <div class="settings-section-label">Audio</div>
+      <div class="settings-row-full">
+        <span class="settings-label-text">Music</span>
+        <div class="volume-slider-row" style="flex: 1;">
+          <input type="range" id="music-volume-slider" min="0" max="100" value="70"
+            oninput="setMusicVolume(this.value)">
+          <span class="volume-value-label" id="music-volume-label">70%</span>
+        </div>
+      </div>
+      <div class="settings-row-full">
+        <span class="settings-label-text">SFX</span>
+        <div class="volume-slider-row" style="flex: 1;">
+          <input type="range" id="sfx-volume-slider" min="0" max="100" value="70"
+            oninput="setSfxVolume(this.value)">
+          <span class="volume-value-label" id="sfx-volume-label">70%</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="settings-divider">
+
+    <div class="settings-section">
+      <div class="settings-section-label">Display</div>
+      <div class="settings-row-full">
+        <span class="settings-label-text">Performance</span>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <strong id="performance-state" class="volume-value-label">OFF</strong>
+          <button id="performance-toggle" class="performance-toggle" onclick="togglePerformanceMode()">
+            <span class="toggle-track"><span class="toggle-knob"></span></span>
+          </button>
+        </div>
+      </div>
+      <div class="settings-row-full">
+        <span class="settings-label-text">FPS Counter</span>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <strong id="fps-state" class="volume-value-label">OFF</strong>
+          <button id="fps-toggle" class="performance-toggle" onclick="toggleFpsCounter()">
+            <span class="toggle-track"><span class="toggle-knob"></span></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    </div>
 </div>
 
 <!-- Update available - replaces the native dialog -->
@@ -1006,7 +1236,7 @@
     <p class="subtitle" id="loading-status">LOADING ASSETS...</p>
     <div class="loader-bar-container"><div id="loader-progress"></div></div>
     <p style="font-size: 9px; letter-spacing: 0.22em; color: rgba(180, 200, 230, 0.32); text-transform: uppercase; margin-top: 28px;">
-      Backspace to quit / return
+      P to pause &nbsp;·&nbsp; Backspace to quit / return
     </p>
   </div>
 
@@ -1025,18 +1255,7 @@
     <button class="button-primary" onclick="nav('modes')">PLAY</button>
     <button onclick="nav('shop')">SHOP</button>
     <button onclick="startGame('inferno', true)">BOTPLAY</button>
-    <div class="settings-row">
-      <button id="performance-toggle" class="performance-toggle" onclick="togglePerformanceMode()">
-        <span>PERFORMANCE</span>
-        <span class="toggle-track"><span class="toggle-knob"></span></span>
-        <strong id="performance-state">OFF</strong>
-      </button>
-      <button id="fps-toggle" class="performance-toggle" onclick="toggleFpsCounter()">
-        <span>FPS</span>
-        <span class="toggle-track"><span class="toggle-knob"></span></span>
-        <strong id="fps-state">OFF</strong>
-      </button>
-    </div>
+    <button onclick="openSettingsOverlay()">SETTINGS</button>
   </div>
 
   <div id="screen-modes" class="screen">
@@ -1063,13 +1282,14 @@
             </div>
           </div>
           <div class="mode-card" onclick="startGame('bossrush')" style="border-color: rgba(255, 85, 255, 0.2);">
-            <p class="mode-desc" style="color: #ff55ff;">CHALLENGE</p>
-            <h3 style="color: #ff55ff;">BOSS RUSH</h3>
-            <div class="mode-stat">
-              <div class="mode-stat-label">PERFORMANCE</div>
-              <span id="bossrush-stat" style="color: #ff55ff; font-size: 18px;">0%</span>
-            </div>
-          </div>
+  <p class="mode-desc" style="color: #ff55ff;">CHALLENGE</p>
+  <!-- Added white-space: nowrap and clamp() font-size to force 1 row -->
+  <h3 style="color: #ff55ff; white-space: nowrap; font-size: clamp(16px, 2.2vw, 26px);">BOSS RUSH</h3>
+  <div class="mode-stat">
+    <div class="mode-stat-label">PERFORMANCE</div>
+    <span id="bossrush-stat" style="color: #ff55ff; font-size: 18px;">0%</span>
+  </div>
+</div>
           <div id="impossible-card" class="mode-card" onclick="nav('impossible')" style="border-color: rgba(125, 255, 217, 0.32); background: linear-gradient(180deg, rgba(125, 255, 217, 0.07), rgba(255, 215, 115, 0.025));">
             <p class="mode-desc" style="color: #7dffd9;">RESONANCE</p>
             <h3 style="color: #f7fbff;">HARMONY</h3>
@@ -1087,26 +1307,9 @@
             </div>
           </div>
           </div>
-
-        <div style="margin-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
-    <div id="upgrade-toggle-container" style="display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 12px 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 40px;" onclick="toggleUpgrades()">
-      <div id="upgrade-toggle-switch" style="width: 44px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 20px; position: relative; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease;">
-        <div id="upgrade-toggle-knob" style="width: 14px; height: 14px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.3s ease;"></div>
-      </div>
-      <span style="font-size: 11px; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); text-transform: uppercase;">Unequip Upgrades (BOSS RUSH ONLY)</span>
-    </div>
-
-    <div id="boost-toggle-container" style="margin-bottom: 25px; display: none; align-items: center; gap: 12px; cursor: pointer; padding: 10px 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 40px;" onclick="toggleBoosts()">
-      <div id="boost-toggle-switch" style="width: 44px; height: 20px; background: rgba(255,255,255,0.1); border-radius: 20px; position: relative; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease;">
-        <div id="boost-toggle-knob" style="width: 14px; height: 14px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.3s ease;"></div>
-      </div>
-      <span style="font-size: 11px; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); text-transform: uppercase;">Disable Boosts (BOSS RUSH ONLY)</span>
-    </div>
-
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
   <div id="screen-shop" class="screen">
     <div class="glass-panel">
@@ -1190,11 +1393,15 @@
     bestBossRush: 0,
     bossProgress: [],
     impossibleBeaten: false,
+    impossibleBestTime: 999999,
+    impossibleBestPercent: 0,
     impossibleSeen: true,
     upgradesDisabled: false,
     boostsDisabled: false,
     performanceMode: false,
     showFps: false,
+    musicVolume: 0.7,
+    sfxVolume: 0.7,
     currentSkin: 'default',
     unlockedSkins: ['default'],
     upgrades: {
@@ -1228,11 +1435,15 @@
   if(!savedData.bestBossRush) savedData.bestBossRush = 0;
   if(!savedData.bossProgress) savedData.bossProgress = [];
   if(savedData.impossibleBeaten === undefined) savedData.impossibleBeaten = false;
+  if(savedData.impossibleBestTime === undefined) savedData.impossibleBestTime = 999999;
+  if(savedData.impossibleBestPercent === undefined) savedData.impossibleBestPercent = 0;
   if(savedData.impossibleSeen === undefined) savedData.impossibleSeen = true;
   if(savedData.upgradesDisabled === undefined) savedData.upgradesDisabled = false;
   if(savedData.boostsDisabled === undefined) savedData.boostsDisabled = false;
   if(savedData.performanceMode === undefined) savedData.performanceMode = false;
   if(savedData.showFps === undefined) savedData.showFps = false;
+  if(savedData.musicVolume === undefined) savedData.musicVolume = 0.7;
+  if(savedData.sfxVolume === undefined) savedData.sfxVolume = 0.7;
   if(!Array.isArray(savedData.unlockedSkins)) savedData.unlockedSkins = ['default'];
   if(!savedData.unlockedSkins.includes('default')) savedData.unlockedSkins.unshift('default');
   if(!savedData.currentSkin) savedData.currentSkin = 'default';
@@ -1282,6 +1493,7 @@
     if (toggle) toggle.classList.toggle('active', enabled);
     if (stateEl) stateEl.textContent = enabled ? 'ON' : 'OFF';
   }
+  window.updatePerformanceUI = updatePerformanceUI;
   window.togglePerformanceMode = function() {
     savedData.performanceMode = !performanceMode();
     updatePerformanceUI();
@@ -1312,12 +1524,50 @@
       fpsCounterEl.textContent = 'FPS 0';
     }
   }
+  window.updateFpsUI = updateFpsUI;
   window.toggleFpsCounter = function() {
     savedData.showFps = !showFpsCounter();
     updateFpsUI();
     saveData();
     tone(savedData.showFps ? 660 : 360, 0.06, 'sine', 0.07);
   }
+
+  function musicVolume() {
+    return typeof savedData.musicVolume === 'number' ? savedData.musicVolume : 0.7;
+  }
+  window.musicVolume = musicVolume;
+
+  function sfxVolume() {
+    return typeof savedData.sfxVolume === 'number' ? savedData.sfxVolume : 0.7;
+  }
+  window.sfxVolume = sfxVolume;
+
+  function updateVolumeUI() {
+    const musicSlider = document.getElementById('music-volume-slider');
+    const sfxSlider = document.getElementById('sfx-volume-slider');
+    const musicLabel = document.getElementById('music-volume-label');
+    const sfxLabel = document.getElementById('sfx-volume-label');
+    if (musicSlider) musicSlider.value = Math.round(musicVolume() * 100);
+    if (sfxSlider) sfxSlider.value = Math.round(sfxVolume() * 100);
+    if (musicLabel) musicLabel.textContent = Math.round(musicVolume() * 100) + '%';
+    if (sfxLabel) sfxLabel.textContent = Math.round(sfxVolume() * 100) + '%';
+  }
+  window.updateVolumeUI = updateVolumeUI;
+
+  window.setMusicVolume = function(value) {
+    savedData.musicVolume = Math.max(0, Math.min(1, value / 100));
+    if (currentTrack) currentTrack.volume = musicVolume();
+    updateVolumeUI();
+    saveData();
+  };
+
+  window.setSfxVolume = function(value) {
+    savedData.sfxVolume = Math.max(0, Math.min(1, value / 100));
+    if (masterGain) masterGain.gain.value = 0.5 * sfxVolume();
+    updateVolumeUI();
+    saveData();
+    tone(520, 0.06, 'sine', 0.1); // quick preview blip so the change is audible
+  };
 
   function updateCoinUI() {
     const prev = parseInt(coinAmtEl.textContent, 10) || 0;
@@ -1360,7 +1610,7 @@
     mono: { name: 'Aegis Mono', category: 'Shield', flavor: 'A shield-white orbit for defensive runs.', glyph: 'M', color: '#f2f7ff', trail: '195,220,255', price: 120, trailType: 'shield', preview: 'ghost' },
     storm: { name: 'Goldstorm', category: 'Double Points', flavor: 'Coin-gold surges from double-point pickups.', glyph: '2', color: '#fff1a3', trail: '255,214,88', price: 150, trailType: 'gold', preview: 'electric' },
     phantom: { name: 'Boss Phantom', category: 'Boss Rush', flavor: 'Wide echo pulses from clearing Boss Rush.', glyph: 'P', color: '#ffd6ff', trail: '255,0,255', price: 200, trailType: 'echo', preview: 'ghost' },
-    pulse: { name: 'S-Rank Pulse', category: 'Boss Rush', flavor: 'A neon heartbeat for perfect Boss Rush control.', glyph: 'S', color: '#bffff2', trail: '0,255,204', price: 250, trailType: 'neon', preview: 'default' },
+    pulse: { name: 'Pulse Runner', category: 'Boss Rush', flavor: 'A neon heartbeat earned by clearing Boss Rush in a flash.', glyph: 'S', color: '#bffff2', trail: '0,255,204', price: 250, trailType: 'neon', preview: 'default' },
     harmony: { name: 'Resonance', category: 'Harmony', flavor: 'Linked cyan, gold, and violet chords from beating Harmony.', glyph: 'H', color: '#f6fff9', trail: '125,255,217', price: 300, trailType: 'harmony', preview: 'harmony' }
   };
   if (!skinConfig[savedData.currentSkin]) savedData.currentSkin = 'default';
@@ -1424,9 +1674,9 @@
         progress: br.beaten ? '1/1' : '0/1'
       },
       pulse: {
-        label: 'S-RANK Boss Rush',
-        done: (br.bestPercent || 0) >= 101,
-        progress: (br.bestPercent || 0) >= 101 ? 'S-RANK' : `${br.bestPercent || 0}%`
+        label: `Beat Boss Rush in under ${BOSS_RUSH_SPEED_THRESHOLD}s`,
+        done: (br.bestTime || 999999) <= BOSS_RUSH_SPEED_THRESHOLD,
+        progress: (br.bestTime || 999999) <= BOSS_RUSH_SPEED_THRESHOLD ? 'CLEARED' : (br.bestTime && br.bestTime < 999999 ? formatTime(br.bestTime) : '0/1')
       },
       harmony: {
         label: 'Beat Harmony',
@@ -1529,6 +1779,9 @@
         currentTrack.currentTime = 0;
     }
     currentTrack = customMusic[trackName];
+    if (currentTrack) {
+        currentTrack.volume = musicVolume();
+    }
     if (currentTrack && currentTrack.play) {
         currentTrack.play().catch(e => console.log("Waiting for user interaction to play audio.", e));
     }
@@ -1542,7 +1795,7 @@
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       masterGain = audioCtx.createGain();
-      masterGain.gain.value = 0.5;
+      masterGain.gain.value = 0.5 * sfxVolume();
       masterGain.connect(audioCtx.destination);
     } catch (e) { }
   }
@@ -1586,6 +1839,10 @@
                       // every !botplay check elsewhere in the game (and
                       // the Backspace handler) stays silently broken
                       // for the rest of the session.
+    isPaused = false;
+    document.getElementById('overlay-paused').classList.remove('active');
+    document.getElementById('unpause-ring').classList.remove('in-range');
+    document.getElementById('overlay-paused-hint').classList.remove('show');
     canvas.style.cursor = 'default';
     scoreHud.classList.remove('show');
     if (runHud) runHud.classList.remove('show');
@@ -1599,11 +1856,7 @@
       const brStat = document.getElementById('bossrush-stat');
       const prog = savedData.bossProgress[currentBossIndex];
       if (prog.beaten) {
-        let rankLabel = '<span style="color:#88ddff;">99.9%</span>';
-        if (prog.bestPercent === 101) rankLabel = '<span style="color:#ffd700; font-weight:bold;">S-RANK</span>';
-        else if (prog.bestPercent === 100) rankLabel = '<span style="color:#55ff55; font-weight:bold;">100%</span>';
-
-        brStat.innerHTML = `${rankLabel} <span style="color: #ff55ff;">${formatTime(prog.bestTime)}</span>`;
+        brStat.innerHTML = `<span style="color: #ff55ff;">${formatTime(prog.bestTime)}</span>`;
       } else {
         brStat.innerHTML = `BEST <span style="color: #ff55ff;">${prog.bestPercent || 0}%</span>`;
       }
@@ -1615,84 +1868,14 @@
       impCard.style.display = 'flex';
       secCard.style.display = 'none';
       if (savedData.impossibleBeaten) {
-        impStat.innerHTML = '<span style="color: #ffd700;">RESOLVED</span>';
+        impStat.innerHTML = `<span style="color: #ffd773;">${formatTime(savedData.impossibleBestTime)}</span>`;
+      } else if (savedData.impossibleBestPercent > 0) {
+        impStat.innerHTML = `BEST <span style="color: #ffd773;">${savedData.impossibleBestPercent}%</span>`;
       } else {
         impStat.innerHTML = '<span style="color: #ffd773;">READY</span>';
       }
-
-      updateUpgradeToggleUI();
     }
   }
-
-  window.toggleUpgrades = function() {
-    savedData.upgradesDisabled = !savedData.upgradesDisabled;
-    if (!savedData.upgradesDisabled) {
-      savedData.boostsDisabled = false;
-    }
-    saveData();
-    updateUpgradeToggleUI();
-    tone(880, 0.05, 'sine', 0.1);
-  }
-
-  window.toggleBoosts = function() {
-    savedData.boostsDisabled = !savedData.boostsDisabled;
-    saveData();
-    updateUpgradeToggleUI();
-    tone(880, 0.05, 'sine', 0.1);
-  }
-
-  function updateUpgradeToggleUI() {
-    const sw = document.getElementById('upgrade-toggle-switch');
-    const knob = document.getElementById('upgrade-toggle-knob');
-    const container = document.getElementById('upgrade-toggle-container');
-    if (!sw || !knob || !container) return;
-
-    let hasAnyUpgrade = false;
-    for (let key in savedData.upgrades) {
-      if (savedData.upgrades[key] > 0) {
-        hasAnyUpgrade = true;
-        break;
-      }
-    }
-
-    container.style.display = hasAnyUpgrade ? 'flex' : 'none';
-
-    if (savedData.upgradesDisabled) {
-      sw.style.background = 'rgba(136, 221, 255, 0.3)';
-      sw.style.borderColor = 'rgba(136, 221, 255, 0.6)';
-      knob.style.left = '26px';
-      knob.style.background = '#88ddff';
-      knob.style.boxShadow = '0 0 10px #88ddff';
-    } else {
-      sw.style.background = 'rgba(255,255,255,0.1)';
-      sw.style.borderColor = 'rgba(255,255,255,0.2)';
-      knob.style.left = '2px';
-      knob.style.background = '#fff';
-      knob.style.boxShadow = 'none';
-    }
-
-    // Boost toggle logic
-    const bSw = document.getElementById('boost-toggle-switch');
-    const bKnob = document.getElementById('boost-toggle-knob');
-    const bContainer = document.getElementById('boost-toggle-container');
-    if (bSw && bKnob && bContainer) {
-      bContainer.style.display = savedData.upgradesDisabled ? 'flex' : 'none';
-      if (savedData.boostsDisabled) {
-        bSw.style.background = 'rgba(255, 85, 255, 0.3)';
-        bSw.style.borderColor = 'rgba(255, 85, 255, 0.6)';
-        bKnob.style.left = '26px';
-        bKnob.style.background = '#ff55ff';
-        bKnob.style.boxShadow = '0 0 10px #ff55ff';
-      } else {
-        bSw.style.background = 'rgba(255,255,255,0.1)';
-        bSw.style.borderColor = 'rgba(255,255,255,0.2)';
-        bKnob.style.left = '2px';
-        bKnob.style.background = '#fff';
-        bKnob.style.boxShadow = 'none';
-      }
-    }
-  }
-
 
   window.switchShopTab = function(tab) {
     document.getElementById('tab-btn-upgrades').classList.remove('active-tab');
@@ -1841,7 +2024,21 @@
   window.addEventListener('resize', resize);
 
   const mouse = { x: W/2, y: H/2, has: false }; window.mouse = mouse;
+
+  // Tracks the cursor's real position at all times, even while paused
+  // (unlike `mouse`, which deliberately freezes during pause so the
+  // ball's lerp-target doesn't drift). Used only for the unpause
+  // proximity check below.
+  const liveCursor = { x: W/2, y: H/2 };
+
   function setMouse(x, y) {
+    liveCursor.x = x; liveCursor.y = y;
+    if (isPaused) {
+      updateUnpauseRingState();
+      return; // don't let the player's in-game position silently
+              // drift while paused - otherwise unpausing teleports
+              // them to wherever the real cursor ended up moving to
+    }
     mouse.x = x; mouse.y = y;
     if (!mouse.has) {
       mouse.has = true;
@@ -1877,6 +2074,14 @@
       // regardless of our own keydown handling. Backspace has no such
       // conflict and isn't used anywhere else in this game.
       handleQuitKey();
+    }
+
+    if (key === 'p' && !botplay && state === 'playing') {
+      togglePause();
+    } else if (key === 'p' && isPaused) {
+      // allow un-pausing even if `state` has technically changed
+      // underneath (shouldn't normally happen, but stay safe)
+      togglePause();
     }
 
     if (key === 'k' && boss) {
@@ -1928,6 +2133,10 @@
 
   let score = 0;
   let bossRushTimer = 0;
+  const BOSS_RUSH_SPEED_THRESHOLD = 60; // seconds - clearing Boss Rush
+                                         // under this time unlocks the
+                                         // Pulse Runner skin. PLACEHOLDER:
+                                         // tune after real playtesting.
   let stateTime = 0;
   let deathTimer = 0;
   let shake = 0;
@@ -1957,9 +2166,21 @@
     { ratio: 0.33, hp: 8, shots: 10, label: 'CRESCENDO', forcePhase3: true }
   ];
   const HARMONY_COLORS = ['#7dffd9', '#ffd773', '#ff6cff'];
+
+  function hexToRgbString(hex) {
+    if (!hex) return '125, 255, 217';
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `${r}, ${g}, ${b}`;
+  }
   const HARMONY_LINK_HIT_PADDING = 6;
   const HARMONY_LINK_BOT_AVOID_RANGE = 122;
   let harmonyShotId = 0;
+  let frameCounter = 0;
+  let harmonyLinkCache = new Map();
+  let harmonyLinkCacheFrame = -1;
 
   function getBossPhase(b) {
     if (!b) return 1;
@@ -2046,6 +2267,13 @@
   }
 
   function collectHarmonyLinkGroups() {
+    // Cached per-frame: this used to run 3x every frame (collision
+    // check, botplay avoidance, drawing), each rescanning the whole
+    // threats array and allocating a fresh Map - real, measurable cost
+    // during Harmony's busiest moments when many linked pairs are alive
+    // at once. Now computed once and reused for the rest of the frame.
+    if (harmonyLinkCacheFrame === frameCounter) return harmonyLinkCache;
+
     const links = new Map();
     threats.forEach(t => {
       if (!t.dead && t.launched && t.isHarmonyShock && t.harmonyLink) {
@@ -2053,6 +2281,8 @@
         links.get(t.harmonyLink).push(t);
       }
     });
+    harmonyLinkCache = links;
+    harmonyLinkCacheFrame = frameCounter;
     return links;
   }
 
@@ -2215,6 +2445,7 @@
   }
 
   function fireHarmonyPattern(b, phase) {
+    const __t0 = performance.now();
     const plan = b.harmonyPlan || buildHarmonyPlan(b, phase);
     plan.shots.forEach(shot => spawnHarmonyShock(b, shot));
     b.harmonyPattern = (b.harmonyPattern || 0) + 1;
@@ -2223,9 +2454,16 @@
     b.harmonyTelegraphAngles = [];
     b.harmonyBurst = 0.35;
     shockwaves.push({ x: b.x, y: b.y, r: 18, life: 0.55, maxLife: 0.55, color: '125, 255, 217' });
+    const __t1 = performance.now();
     emitParticles(b.x, b.y, phase === 3 ? 38 : 24, plan.color, 260 + phase * 80, 0.75, 3, 'star');
+    const __t2 = performance.now();
     tone(110 + phase * 55, 0.12, 'sawtooth', 0.16);
     tone(440 + phase * 110, 0.18, 'triangle', 0.12);
+    const __t3 = performance.now();
+    const __total = __t3 - __t0;
+    if (__total > 4) {
+      console.log(`[PERF] fireHarmonyPattern: ${__total.toFixed(2)}ms total | plan+spawn: ${(__t1-__t0).toFixed(2)}ms | emitParticles: ${(__t2-__t1).toFixed(2)}ms | tone x2: ${(__t3-__t2).toFixed(2)}ms | shots=${plan.shots.length}`);
+    }
   }
 
   function splitHarmonyShock(t) {
@@ -2321,6 +2559,10 @@
     ensureAudio();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     
+    isPaused = false;
+    document.getElementById('overlay-paused').classList.remove('active');
+    document.getElementById('unpause-ring').classList.remove('in-range');
+    document.getElementById('overlay-paused-hint').classList.remove('show');
     botplay = isBotplay;
     currentMode = mode;
     currentBossIndex = 0;
@@ -2578,10 +2820,13 @@
 
     if (currentMode === 'impossible') {
       if (isVictory) {
-        deadScore.textContent = "S-RANK";
+        deadScore.textContent = "100%";
         deadSubtitle.textContent = "HARMONY RESOLVED · " + formatTime(bossRushTimer);
         deadSubtitle.style.color = "#7dffd9";
         savedData.impossibleBeaten = true;
+        if (bossRushTimer < (savedData.impossibleBestTime || 999999)) {
+          savedData.impossibleBestTime = bossRushTimer;
+        }
       } else {
         const hpLeft = boss ? boss.hp : 0;
         const maxHp = boss ? boss.maxHp : 1;
@@ -2589,43 +2834,20 @@
         deadScore.textContent = percent + "%";
         deadSubtitle.textContent = "RESONANCE BROKEN";
         deadSubtitle.style.color = "#ff6cff";
+        if (percent > (savedData.impossibleBestPercent || 0)) {
+          savedData.impossibleBestPercent = percent;
+        }
       }
     } else if (currentMode === 'bossrush') {
       const prog = savedData.bossProgress[currentBossIndex];
       if (isVictory) {
-        let hasUpgradesBought = false;
-        for (let key in savedData.upgrades) {
-            if (savedData.upgrades[key] > 0) {
-              hasUpgradesBought = true;
-              break;
-            }
-        }
-
-        let percent = 99.9;
-        if (!hasUpgradesBought || savedData.upgradesDisabled) {
-            percent = 100;
-            if (savedData.boostsDisabled) {
-                percent = 101; // Internal code for S-RANK
-            }
-        }
-
-        if (percent === 101) {
-            deadScore.textContent = "S-RANK";
-            deadSubtitle.textContent = "100% COMPLETION · " + formatTime(bossRushTimer);
-            deadSubtitle.style.color = "#ffd700";
-        } else if (percent === 100) {
-            deadScore.textContent = "100%";
-            deadSubtitle.textContent = "CHALLENGE SUCCEEDED · " + formatTime(bossRushTimer);
-            deadSubtitle.style.color = "#55ff55";
-        } else {
-            deadScore.textContent = "99.9%";
-            deadSubtitle.textContent = "CHALLENGE SUCCEEDED · " + formatTime(bossRushTimer);
-            deadSubtitle.style.color = "#88ddff";
-        }
+        deadScore.textContent = "100%";
+        deadSubtitle.textContent = "CHALLENGE SUCCEEDED · " + formatTime(bossRushTimer);
+        deadSubtitle.style.color = "#55ff55";
 
 	        prog.beaten = true;
 	        if (!botplay) savedData.stats.bossRushWins = (savedData.stats.bossRushWins || 0) + 1;
-	        if (percent > (prog.bestPercent || 0)) prog.bestPercent = percent;
+	        if (100 > (prog.bestPercent || 0)) prog.bestPercent = 100;
         if (bossRushTimer < (prog.bestTime || 999999)) prog.bestTime = bossRushTimer;
       } else {
         const hpLeft = boss ? boss.hp : 0;
@@ -2745,7 +2967,70 @@
 
   let lastTime = performance.now();
 
+  let isPaused = false;
+  let pausedAt = { x: 0, y: 0 }; // ball's frozen position when paused
+  const UNPAUSE_RADIUS = 45; // cursor must be within this distance of
+                              // where the ball actually is to resume -
+                              // otherwise pausing, moving the mouse
+                              // across the map, and unpausing would
+                              // teleport the ball there instantly
+
+  window.togglePause = function() {
+    if (!isPaused) {
+      isPaused = true;
+      pausedAt.x = player.x;
+      pausedAt.y = player.y;
+      document.getElementById('overlay-paused').classList.add('active');
+      const ring = document.getElementById('unpause-ring');
+      ring.style.left = pausedAt.x + 'px';
+      ring.style.top = pausedAt.y + 'px';
+      updateUnpauseRingState();
+      if (currentTrack) currentTrack.pause();
+      return;
+    }
+
+    // Trying to resume - only allow it if the cursor is currently
+    // inside the ring around where the ball actually is.
+    const dist = Math.hypot(liveCursor.x - pausedAt.x, liveCursor.y - pausedAt.y);
+    if (dist > UNPAUSE_RADIUS) {
+      flashUnpauseBlocked();
+      return;
+    }
+
+    isPaused = false;
+    document.getElementById('overlay-paused').classList.remove('active');
+    document.getElementById('unpause-ring').classList.remove('in-range');
+    document.getElementById('overlay-paused-hint').classList.remove('show');
+    if (currentTrack) currentTrack.play().catch(() => {});
+  };
+
+  let unpauseBlockedTimer = null;
+  function flashUnpauseBlocked() {
+    const label = document.getElementById('overlay-paused-hint');
+    if (!label) return;
+    label.classList.add('show');
+    clearTimeout(unpauseBlockedTimer);
+    unpauseBlockedTimer = setTimeout(() => label.classList.remove('show'), 1400);
+  }
+
+  // Called continuously (via setMouse) while paused, so the ring lights
+  // up the moment the cursor enters range, before the player even
+  // presses P - so they know they CAN resume, rather than finding out
+  // only after a failed attempt.
+  function updateUnpauseRingState() {
+    const ring = document.getElementById('unpause-ring');
+    if (!ring) return;
+    const dist = Math.hypot(liveCursor.x - pausedAt.x, liveCursor.y - pausedAt.y);
+    ring.classList.toggle('in-range', dist <= UNPAUSE_RADIUS);
+  }
+
   function loop(now) {
+    if (isPaused) {
+      lastTime = now; // keep this fresh so resuming doesn't see one giant frame
+      requestAnimationFrame(loop);
+      return;
+    }
+
     const frameSeconds = Math.max(0, (now - lastTime) / 1000);
     let rawDt = Math.min(frameSeconds, performanceMode() ? 0.033 : 0.05);
     lastTime = now;
@@ -2755,12 +3040,21 @@
       rawDt = 0;
     }
 
+    const __u0 = performance.now();
     update(rawDt);
+    const __u1 = performance.now();
     draw();
+    const __u2 = performance.now();
+    const __frameTotal = __u2 - __u0;
+    if (__frameTotal > 16.7) { // longer than one 60fps frame budget
+      console.log(`[PERF] FRAME SPIKE: ${__frameTotal.toFixed(2)}ms | update: ${(__u1-__u0).toFixed(2)}ms | draw: ${(__u2-__u1).toFixed(2)}ms | mode=${currentMode} | threats=${threats.length} | particles=${particles.length}`);
+    }
+
     requestAnimationFrame(loop);
   }
 
   function update(dt) {
+    frameCounter++;
     // Slipstream Upgrade (Time Slowdown) & Slowmo Powerup
     let gameDt = dt;
     if (activePowerups.slowmo > 0) {
@@ -4115,18 +4409,40 @@
         const links = collectHarmonyLinkGroups();
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
+        ctx.lineCap = 'round';
         for (const group of links.values()) {
           if (group.length < 2) continue;
           const a = group[0];
           const b = group[1];
           const pulse = 0.5 + Math.sin(stateTime * 12 + a.harmonyLink) * 0.5;
           const alpha = 0.18 + pulse * 0.22;
-          ctx.strokeStyle = `rgba(125, 255, 217, ${alpha})`;
-          ctx.lineWidth = perf ? 2 : 3.5 + pulse * 2.5;
-          ctx.lineCap = 'round';
+          const coreWidth = perf ? 2 : 3.5 + pulse * 2.5;
+
           if (!perf) {
-            ctx.shadowBlur = 18;
-            ctx.shadowColor = '#7dffd9';
+            // Cheap fake-glow: two wider, fainter strokes drawn under
+            // the core line instead of shadowBlur. shadowBlur forces a
+            // real per-pixel blur convolution every frame for every
+            // linked pair alive at once, which is what was actually
+            // causing the freezes during Harmony's busiest moments -
+            // this gets a similar visual glow for a fraction of the cost.
+            ctx.strokeStyle = `rgba(125, 255, 217, ${alpha * 0.25})`;
+            ctx.lineWidth = coreWidth + 10;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+
+            ctx.strokeStyle = `rgba(125, 255, 217, ${alpha * 0.45})`;
+            ctx.lineWidth = coreWidth + 4;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+
+          ctx.strokeStyle = `rgba(125, 255, 217, ${alpha})`;
+          ctx.lineWidth = coreWidth;
+          if (!perf) {
             ctx.setLineDash([10, 12]);
             ctx.lineDashOffset = -stateTime * 42;
           }
@@ -4145,7 +4461,7 @@
 	        const wr = 32 * (1 - wp) + 6;
 	        const aimAngle = Math.atan2(t.vy, t.vx);
 	        const aimLen = 72 + wp * 118;
-	        const warnCol = t.isHarmonyShock ? '125, 255, 217' : (t.isEnergyBall ? '80, 210, 255' : '255, 110, 80');
+	        const warnCol = t.isHarmonyShock ? hexToRgbString(t.harmonyColor) : (t.isEnergyBall ? '80, 210, 255' : '255, 110, 80');
 	        ctx.save();
 	        ctx.setLineDash([5, 8]);
 	        ctx.lineDashOffset = -wp * 28;
@@ -4164,7 +4480,7 @@
       } else {
 	        for (let i = 0; !perf && i < t.trail.length - 1; i++) {
 	          const a = (i + 1) / t.trail.length;
-	          const trailCol = t.isHarmonyShock ? '125, 255, 217' : (t.isEnergyBall ? '80, 210, 255' : (t.isMinion ? '100, 255, 100' : '255, 110, 80'));
+	          const trailCol = t.isHarmonyShock ? hexToRgbString(t.harmonyColor) : (t.isEnergyBall ? '80, 210, 255' : (t.isMinion ? '100, 255, 100' : '255, 110, 80'));
 	          ctx.strokeStyle = `rgba(${trailCol}, ${a * 0.55})`;
           ctx.lineWidth = a * (t.isHarmonyShock ? 8 : 5);
           ctx.lineCap = 'round';
@@ -4195,19 +4511,30 @@
 	          const pulse = 0.5 + Math.sin(stateTime * 13 + (t.phase || 0) * 8) * 0.5;
 	          const baseR = t.r || 16;
 	          const coreColor = t.harmonyColor || '#7dffd9';
+	          const coreRgb = hexToRgbString(coreColor);
 	          ctx.save();
 	          ctx.translate(t.x, t.y);
 	          ctx.rotate((t.phase || 0) * (t.isHarmonyShard ? -5 : 3.2));
 	          ctx.globalCompositeOperation = 'screen';
-	          ctx.shadowBlur = perf ? 0 : 24;
-	          ctx.shadowColor = coreColor;
-	          ctx.strokeStyle = `rgba(125, 255, 217, ${0.28 + pulse * 0.34})`;
+	          // No shadowBlur here - this runs once per projectile, per
+	          // frame, and Harmony patterns commonly have 8-10 of these
+	          // alive simultaneously. shadowBlur's per-pixel convolution
+	          // at that scale was the dominant cause of the freezes during
+	          // busy moments. A faint extra ring underneath fakes a
+	          // similar soft-glow look for a fraction of the cost.
+	          const ringR = baseR * (1.7 + pulse * 0.22);
+	          if (!perf) {
+	            ctx.strokeStyle = `rgba(${coreRgb}, ${(0.28 + pulse * 0.34) * 0.35})`;
+	            ctx.lineWidth = 1.5 + 5;
+	            ctx.beginPath(); ctx.arc(0, 0, ringR, 0, Math.PI * 2); ctx.stroke();
+	          }
+	          ctx.strokeStyle = `rgba(${coreRgb}, ${0.28 + pulse * 0.34})`;
 	          ctx.lineWidth = 1.5;
 	          if (!perf) {
 	            ctx.setLineDash([4, 5]);
 	            ctx.lineDashOffset = -stateTime * 34;
 	          }
-	          ctx.beginPath(); ctx.arc(0, 0, baseR * (1.7 + pulse * 0.22), 0, Math.PI * 2); ctx.stroke();
+	          ctx.beginPath(); ctx.arc(0, 0, ringR, 0, Math.PI * 2); ctx.stroke();
 	          ctx.setLineDash([]);
 	          ctx.strokeStyle = `rgba(255, 215, 115, ${0.35 + pulse * 0.25})`;
 	          ctx.lineWidth = 2;
@@ -4220,7 +4547,7 @@
 	            ctx.lineTo(Math.cos(a + 0.18) * outer, Math.sin(a + 0.18) * outer);
 	          }
 	          ctx.stroke();
-	          ctx.fillStyle = `rgba(125, 255, 217, ${0.20 + pulse * 0.18})`;
+	          ctx.fillStyle = `rgba(${coreRgb}, ${0.20 + pulse * 0.18})`;
 	          ctx.beginPath(); ctx.arc(0, 0, baseR * 1.28, 0, Math.PI * 2); ctx.fill();
 	          ctx.fillStyle = coreColor;
 	          ctx.beginPath(); ctx.arc(0, 0, baseR * 0.72, 0, Math.PI * 2); ctx.fill();
@@ -4575,12 +4902,30 @@
         ctx.translate(fx.x, fx.y);
         ctx.rotate(fx.rot);
         ctx.globalCompositeOperation = 'screen';
-        ctx.shadowBlur = perf ? 0 : 28;
-        ctx.shadowColor = fx.color;
-        ctx.strokeStyle = fx.kind === 'break'
+        // No shadowBlur - this fires every time the player hits/kills a
+        // Sentinel (i.e. exactly the "shoot the boss" moment), drawing
+        // 3 rotating rectangles plus a ring. shadowBlur's per-pixel
+        // convolution across multiple shapes here was a real cost
+        // spike right at the moment players reported freezing.
+        const ringStroke = fx.kind === 'break'
           ? `rgba(255, 255, 255, ${0.28 + inv * 0.36})`
           : `rgba(125, 255, 217, ${0.18 + inv * 0.48})`;
+        ctx.strokeStyle = ringStroke;
         ctx.lineWidth = 1.5 + inv * 2.5;
+        if (!perf) {
+          // faint wide stroke underneath fakes the soft glow cheaply
+          ctx.save();
+          ctx.globalAlpha = 0.35;
+          ctx.lineWidth = (1.5 + inv * 2.5) + 4;
+          for (let i = 0; i < 3; i++) {
+            const s = base + i * 16;
+            ctx.save();
+            ctx.rotate(i * Math.PI / 4 + p * (fx.kind === 'hide' ? -1.8 : 1.8));
+            ctx.strokeRect(-s / 2, -s / 2, s, s);
+            ctx.restore();
+          }
+          ctx.restore();
+        }
         for (let i = 0; i < 3; i++) {
           const s = base + i * 16;
           ctx.save();
@@ -4895,6 +5240,13 @@
     if (document.getElementById('overlay-updating').classList.contains('active')) return;
     if (document.getElementById('overlay-update-done').classList.contains('active')) return;
 
+    // --- ADDED THIS SECTION TO HANDLE SETTINGS CLOSING VIA BACKSPACE ---
+    if (document.getElementById('overlay-settings').classList.contains('active')) {
+      window.closeSettingsOverlay();
+      return;
+    }
+    // ------------------------------------------------------------------
+
     // Mid-run: do nothing at all.
     if (state === 'playing' || state === 'dying') return;
 
@@ -4931,6 +5283,37 @@
   };
   let quitConfirmedByUser = false;
 
+  window.openSettingsOverlay = function() {
+    updateVolumeUI();
+    updatePerformanceUI();
+    updateFpsUI();
+    document.getElementById('overlay-settings').classList.add('active');
+  };
+  window.closeSettingsOverlay = function() {
+    document.getElementById('overlay-settings').classList.remove('active');
+  };
+// --- PASTE THE NEW RESTORE DEFAULTS FUNCTION HERE ---
+  window.restoreDefaults = function() {
+    savedData.musicVolume = 0.7;
+    savedData.sfxVolume = 0.7;
+    savedData.performanceMode = false;
+    savedData.showFps = false;
+
+    // Reset live audio mixing parameters
+    if (currentTrack) currentTrack.volume = 0.7;
+    if (masterGain) masterGain.gain.value = 0.5 * 0.7;
+
+    // Update system states and UI components
+    updateVolumeUI();
+    updatePerformanceUI();
+    updateFpsUI();
+
+    saveData();
+    if (typeof resize === 'function') resize(); // Re-render scaling if needed
+    
+    // Quick audio confirmation sound
+    if (typeof tone === 'function') tone(440, 0.15, 'triangle', 0.1); 
+  };
   window.confirmQuitOverlay = async function() {
     document.getElementById('overlay-quit').classList.remove('active');
     if (quitOverlayMode === 'app') {
