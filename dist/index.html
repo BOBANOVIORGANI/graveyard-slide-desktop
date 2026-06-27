@@ -1284,7 +1284,7 @@
           <div class="mode-card" onclick="startGame('bossrush')" style="border-color: rgba(255, 85, 255, 0.2);">
   <p class="mode-desc" style="color: #ff55ff;">CHALLENGE</p>
   <!-- Added white-space: nowrap and clamp() font-size to force 1 row -->
-  <h3 style="color: #ff55ff; white-space: nowrap; font-size: clamp(16px, 2.2vw, 26px);">BOSS RUSH</h3>
+  <h3 style="color: #ff55ff; white-space: nowrap; font-size: clamp(16px, 2.2vw, 26px); transform: translateX(-7.7px);">BOSS RUSH</h3>
   <div class="mode-stat">
     <div class="mode-stat-label">PERFORMANCE</div>
     <span id="bossrush-stat" style="color: #ff55ff; font-size: 18px;">0%</span>
@@ -1292,7 +1292,7 @@
 </div>
           <div id="impossible-card" class="mode-card" onclick="nav('impossible')" style="border-color: rgba(125, 255, 217, 0.32); background: linear-gradient(180deg, rgba(125, 255, 217, 0.07), rgba(255, 215, 115, 0.025));">
             <p class="mode-desc" style="color: #7dffd9;">RESONANCE</p>
-            <h3 style="color: #f7fbff;">HARMONY</h3>
+            <h3 style="color: #f7fbff; transform: translateX(-4px);">HARMONY</h3>
             <div class="mode-stat">
               <div class="mode-stat-label">STATUS</div>
               <span id="impossible-stat" style="color: #ffd773; font-size: 18px;">READY</span>
@@ -1402,6 +1402,7 @@
     showFps: false,
     musicVolume: 0.7,
     sfxVolume: 0.7,
+    lastSeenWhatsNewVersion: null,
     currentSkin: 'default',
     unlockedSkins: ['default'],
     upgrades: {
@@ -1444,6 +1445,7 @@
   if(savedData.showFps === undefined) savedData.showFps = false;
   if(savedData.musicVolume === undefined) savedData.musicVolume = 0.7;
   if(savedData.sfxVolume === undefined) savedData.sfxVolume = 0.7;
+  if(savedData.lastSeenWhatsNewVersion === undefined) savedData.lastSeenWhatsNewVersion = null;
   if(!Array.isArray(savedData.unlockedSkins)) savedData.unlockedSkins = ['default'];
   if(!savedData.unlockedSkins.includes('default')) savedData.unlockedSkins.unshift('default');
   if(!savedData.currentSkin) savedData.currentSkin = 'default';
@@ -5414,12 +5416,6 @@
         }
       });
 
-      // Stash the version we just updated to, so after relaunch we know
-      // to show the "What's New" screen for it (see check below).
-      try {
-        localStorage.setItem('graveyard_pending_whats_new', pendingUpdate.version);
-      } catch (e) { /* non-fatal if storage write fails */ }
-
       await window.__TAURI__.process.relaunch();
     } catch (err) {
       console.error('Update failed:', err);
@@ -5427,30 +5423,45 @@
     }
   };
 
-  // After relaunching post-update, show the changelog once.
+  // Show the changelog whenever the running app's actual version differs
+  // from the last version we recorded showing it for. This deliberately
+  // does NOT depend on anything written right before relaunch() - on
+  // Windows specifically, Tauri kills the process during the install
+  // step itself (a documented platform limitation), which can happen
+  // before a pre-relaunch write ever executes. Comparing versions after
+  // the fact, on every normal startup, sidesteps that race entirely.
   window.addEventListener('DOMContentLoaded', async () => {
-    let pendingVersion = null;
+    if (!window.__TAURI__) return;
     try {
-      pendingVersion = localStorage.getItem('graveyard_pending_whats_new');
-    } catch (e) { /* ignore */ }
-    if (!pendingVersion) return;
+      const currentVersion = await window.__TAURI__.app.getVersion();
+      const lastSeenVersion = savedData.lastSeenWhatsNewVersion || null;
 
-    try {
-      localStorage.removeItem('graveyard_pending_whats_new');
-    } catch (e) { /* ignore */ }
+      if (lastSeenVersion !== null && lastSeenVersion !== currentVersion) {
+        document.getElementById('whats-new-version-tag').textContent = `V${currentVersion}`;
+        const bodyEl = document.getElementById('whats-new-body');
+        document.getElementById('overlay-update-done').classList.add('active');
 
-    document.getElementById('whats-new-version-tag').textContent = `V${pendingVersion}`;
-    const bodyEl = document.getElementById('whats-new-body');
-    document.getElementById('overlay-update-done').classList.add('active');
+        try {
+          const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
+          if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
+          const data = await res.json();
+          bodyEl.innerHTML = renderChangelog(data.body || 'No release notes were provided for this update.');
+        } catch (err) {
+          console.error('Failed to fetch release notes:', err);
+          bodyEl.textContent = "Couldn't load the changelog, but the update installed successfully.";
+        }
+      }
 
-    try {
-      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
-      if (!res.ok) throw new Error(`GitHub API returned ${res.status}`);
-      const data = await res.json();
-      bodyEl.innerHTML = renderChangelog(data.body || 'No release notes were provided for this update.');
+      // Record the version we just checked against, regardless of
+      // whether we showed the changelog (covers first-ever launch too,
+      // where lastSeenVersion starts null - no changelog on first run,
+      // just establishes the baseline).
+      if (lastSeenVersion !== currentVersion) {
+        savedData.lastSeenWhatsNewVersion = currentVersion;
+        saveData();
+      }
     } catch (err) {
-      console.error('Failed to fetch release notes:', err);
-      bodyEl.textContent = "Couldn't load the changelog, but the update installed successfully.";
+      console.error('Version check for changelog failed:', err);
     }
   });
 

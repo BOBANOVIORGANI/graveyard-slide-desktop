@@ -1,92 +1,59 @@
-# Graveyard Slide — Desktop App (Tauri)
+# Graveyard Slide
 
-This is the canonical, single source of truth for the Windows + macOS desktop
-build. Both platforms build from this exact same folder — platform-specific
-settings (macOS title bar, Windows installer branding, etc.) live side by
-side in the same config files and just get ignored on the platform they
-don't apply to.
+**Abstract Survival.** Navigate intense modes, dodge relentless threats, and push your reflexes to the edge in this high-speed avoidance game.
 
-## Project layout
+---
 
-```
-dist/                  ← the actual game (untouched gameplay code)
-  index.html
-  favicon.ico
-  msc/                 ← music files
-src-tauri/
-  Cargo.toml           ← Rust dependencies
-  tauri.conf.json      ← window, bundle, installer, and updater config
-  capabilities/
-    default.json       ← frontend permissions for the updater/dialog plugins
-  icons/                ← app icon (all platform formats)
-  installer/            ← Windows NSIS installer header/sidebar images
-  src/main.rs           ← native menu, console-window fix, plugin setup
-.github/workflows/
-  build.yml             ← CI: builds + signs both platforms, publishes releases
-```
+## Download
 
-## One-time setup per machine
+Grab the latest version for your platform from the [Releases page](../../releases/latest):
 
-**Both platforms need:** Rust (rustup.rs) and Node.js (nodejs.org).
-**Windows also needs:** Visual Studio Build Tools, "Desktop development with
-C++" workload.
-**macOS also needs:** Xcode Command Line Tools (`xcode-select --install`).
+- **Windows** — download the `.exe` installer, run it, play.
+- **macOS** — download the `.dmg`, then see the **important step below** before opening the app.
 
-```bash
-npm install
-```
+---
 
-## Day to day
+## ⚠️ macOS: one-time setup step
 
-```bash
-npm run tauri dev      # test in a window, hot-reloads on save
-npm run tauri build    # produce the real installer
-```
+The first time you open Graveyard Slide on Mac, you'll likely see this message:
 
-Output lands in `src-tauri/target/release/bundle/`:
-- macOS → `macos/Graveyard Slide.app` and `dmg/*.dmg`
-- Windows → `nsis/*-setup.exe` and `msi/*.msi`
+> **"Graveyard Slide.app" is damaged and can't be opened. You should move it to the Trash.**
 
-## Working across two machines - use git, not zip files
+**Don't trash it — the app is not actually damaged.** This message appears because the app isn't signed with a paid Apple Developer certificate. It's a common message for small, independently-made apps and is completely safe to work around.
 
-Don't hand-copy the folder between Mac and Windows anymore - that's what
-caused the drift we just cleaned up. Instead:
+**Fix it in 30 seconds:**
 
-```bash
-git pull            # before you start working
-# ...make changes...
-git add .
-git commit -m "describe what changed"
-git push            # before you switch machines
-```
+1. Drag **Graveyard Slide.app** into your **Applications** folder, if you haven't already.
+2. Open **Terminal** (press `Cmd + Space`, type `Terminal`, hit Enter).
+3. Paste this command and press Enter:
+   ```
+   xattr -cr "/Applications/Graveyard Slide.app"
+   ```
+4. Open Graveyard Slide again — it'll now launch normally.
 
-`node_modules/` and `src-tauri/target/` are gitignored on purpose - each
-machine regenerates those locally via `npm install` / the build itself.
-Everything that actually matters (config, Rust source, the game files) is
-tracked, so both machines always converge to the same state.
+You only need to do this once. Future updates install automatically and won't trigger this again.
 
-## Auto-updates
+---
 
-The app checks GitHub Releases on launch for a newer version and prompts to
-install it automatically - no manual redownloading needed for users who
-already have it installed. To ship an update:
+## Modes
 
-1. Bump `"version"` in `src-tauri/tauri.conf.json`.
-2. `git add . && git commit -m "vX.Y.Z" && git push`
-3. `git tag vX.Y.Z && git push origin vX.Y.Z`
-4. GitHub Actions builds, signs, and drafts a release with both installers
-   plus the `latest.json` manifest the updater reads.
-5. Publish the draft release (un-draft it).
+- **Classic** — the original, relaxing survival mode.
+- **Inferno** — an intense, faster-paced challenge.
+- **Boss Rush** — face down the bosses with boosts and upgrades in play.
+- **Harmony** — the ultimate test. Precision, timing, and nerve.
 
-This requires the signing keypair generated via `npx tauri signer generate`
-and two GitHub repo secrets: `TAURI_SIGNING_PRIVATE_KEY` and
-`TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. The public key half lives in
-`tauri.conf.json` under `plugins.updater.pubkey`.
+## Controls
 
-## Known placeholders to swap for your own content eventually
+- **Mouse** — your ball follows the cursor.
+- **P** — pause / resume.
+- **Backspace** — back out of a menu, or quit from the main menu.
 
-- `src-tauri/icons/` - currently a generated tombstone+moon placeholder
-- `src-tauri/installer/` - matching placeholder header/sidebar images
-- `plugins.updater.endpoints` in `tauri.conf.json` - needs your actual
-  GitHub username/repo
-- `plugins.updater.pubkey` - needs your actual generated public key
+## Updates
+
+Graveyard Slide checks for updates automatically when you open it. If a new version is available, you'll see an in-game prompt — click to update, and the game will restart itself once it's ready. No need to manually redownload anything after your first install.
+
+---
+
+## Feedback
+
+Found a bug, or have an idea? Open an [issue](../../issues) — always happy to hear from players.
