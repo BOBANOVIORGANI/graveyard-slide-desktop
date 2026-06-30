@@ -61,6 +61,7 @@
     align-items: center;
     text-align: center;
     pointer-events: auto;
+    position: relative;
     animation: screen-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
   .screen.active {
@@ -175,6 +176,7 @@
     cursor: pointer;
     border-radius: 2px;
     box-shadow: none;
+    position: relative;
     transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
   }
 
@@ -204,6 +206,38 @@
     opacity: 0.4;
     cursor: not-allowed;
     background: rgba(0, 0, 0, 0.2);
+  }
+
+  /* ============== KEYBOARD / NUMBER-KEY NAVIGATION ============== */
+  .kb-focus {
+    outline: none !important;
+    border-color: rgba(158, 231, 255, 0.85) !important;
+    box-shadow: 0 0 0 2px rgba(158, 231, 255, 0.28), 0 0 22px rgba(158, 231, 255, 0.22) !important;
+  }
+  .settings-row-full.kb-focus {
+    background: rgba(158, 231, 255, 0.06);
+    outline: 1px solid rgba(158, 231, 255, 0.4);
+    border-radius: 6px;
+    padding: 10px 10px;
+    margin: 0 -10px;
+  }
+  [data-kbnum]::after { content: ''; }
+  body.show-kb-numbers [data-kbnum]::after {
+    content: attr(data-kbnum);
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0;
+    color: rgba(158, 231, 255, 0.9);
+    pointer-events: none;
+    z-index: 2;
+  }
+  body.show-kb-numbers .mode-card[data-kbnum]::after,
+  body.show-kb-numbers #screen-impossible [data-kbnum]::after {
+    top: 10px;
+    right: 10px;
   }
 
   /* HUD */
@@ -338,7 +372,7 @@
   }
 
   .glass-content {
-    padding: 0 40px 40px 40px;
+    padding: 8px 40px 40px 40px;
     overflow-y: auto;
     flex-grow: 1;
   }
@@ -353,6 +387,11 @@
   }
   .modes-panel {
     max-width: 1120px;
+  }
+  .shop-panel {
+    width: 720px;
+    max-width: 92%;
+    flex-shrink: 0;
   }
   .mode-card {
     background: rgba(255,255,255,0.018);
@@ -443,75 +482,97 @@
   }
 
   .shop-tabs {
-    display: inline-flex;
-    gap: 0;
-    width: auto;
-    min-width: 286px;
-    margin: 0 auto 20px auto;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 40px;
-    padding: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+    margin: 0 auto 8px auto;
+    overflow: hidden;
   }
   .shop-tabs button {
     border: none;
     background: transparent;
-    min-width: 138px;
-    padding: 8px 24px;
-    margin: 0;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 400;
-    color: #888;
     box-shadow: none;
-  }
-  .shop-tabs button:hover:not(.active-tab) {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.05);
+    padding: 0;
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    cursor: pointer;
+    transition: font-size 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+                opacity 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+                color 0.32s ease,
+                transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
   .shop-tabs button.active-tab {
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    font-weight: 200;
+    font-size: 40px;
+    color: rgba(244, 247, 255, 0.9);
+    opacity: 1;
+    transform: scale(1);
+  }
+  .shop-tabs button:not(.active-tab) {
+    font-weight: 300;
+    font-size: 20px;
+    color: rgba(180, 200, 230, 0.4);
+    opacity: 0.6;
+    transform: scale(0.92);
+  }
+  /* Removes the background, border, and glow from the global button hover */
+.shop-tabs button:hover:not(:disabled) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Prevents the text from jumping up on hover by enforcing their original scales */
+.shop-tabs button:not(.active-tab):hover:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.shop-tabs button.active-tab:hover:not(:disabled) {
+  transform: scale(1);
+}
+  @media (max-width: 768px) {
+    .shop-tabs button.active-tab { font-size: 30px; }
   }
 
   .shop-content {
     display: none;
     width: 100%;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
     margin-bottom: 20px;
   }
   .shop-content.active { display: grid; }
   .shop-content.skin-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
   }
 
   .shop-card {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     background: rgba(255,255,255,0.02);
     border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: 12px 14px;
-    text-align: left;
-    gap: 14px;
+    border-radius: 10px;
+    padding: 18px 12px 14px 12px;
+    text-align: center;
     min-width: 0;
+    min-height: 178px;
+    justify-content: space-between;
     transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
   }
 
   .shop-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     background: rgba(255,255,255,0.035);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+    border-color: rgba(255, 255, 255, 0.22);
   }
 
   .shop-icon-wrapper {
-    width: 48px; height: 48px;
+    width: 64px; height: 64px;
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.4);
     display: flex;
@@ -520,20 +581,24 @@
     flex-shrink: 0;
     box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 10px;
   }
+  .shop-icon-wrapper svg { width: 28px; height: 28px; }
 
   .shop-card-info {
     display: flex;
     flex-direction: column;
+    align-items: center;
     flex-grow: 1;
     justify-content: center;
+    width: 100%;
   }
 
   .shop-card h3 {
     font-family: 'Fraunces', serif;
     font-weight: 300;
-    font-size: 16px;
-    margin: 0 0 4px 0;
+    font-size: 15px;
+    margin: 0 0 6px 0;
     color: #fff;
   }
   
@@ -546,16 +611,27 @@
   }
 
   .shop-card .card-desc {
-    font-size: 10px;
-    color: #ccc;
+    font-size: 9.5px;
+    color: rgba(220,228,245,0.55);
     margin: 0;
     line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .shop-card-footer {
+    width: 100%;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
   }
 
   .shop-card button {
-    width: auto; margin: 0;
-    padding: 8px 16px;
-    font-size: 11px;
+    width: 100%; margin: 0;
+    padding: 7px 10px;
+    font-size: 10.5px;
     flex-shrink: 0;
     white-space: nowrap;
   }
@@ -564,12 +640,12 @@
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    min-height: 118px;
-    align-items: stretch;
-    padding: 12px;
+    min-height: 200px;
+    flex-direction: column;
+    padding: 18px 12px 14px 12px;
     background:
-      radial-gradient(circle at 18% 48%, rgba(var(--skin-rgb), 0.18), transparent 36%),
-      linear-gradient(135deg, rgba(var(--skin-rgb), 0.055), rgba(255,255,255,0.018) 54%, rgba(0,0,0,0.12));
+      radial-gradient(circle at 50% 32%, rgba(var(--skin-rgb), 0.16), transparent 46%),
+      linear-gradient(135deg, rgba(var(--skin-rgb), 0.05), rgba(255,255,255,0.016) 54%, rgba(0,0,0,0.12));
     border-color: rgba(var(--skin-rgb), 0.18);
   }
   .skin-card::before {
@@ -577,10 +653,10 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    opacity: 0.55;
+    opacity: 0.5;
     background:
-      linear-gradient(120deg, transparent 0 32%, rgba(255,255,255,0.065) 32% 33%, transparent 33% 100%),
-      radial-gradient(circle at 82% 18%, rgba(var(--skin-rgb), 0.14), transparent 28%);
+      linear-gradient(120deg, transparent 0 32%, rgba(255,255,255,0.06) 32% 33%, transparent 33% 100%),
+      radial-gradient(circle at 82% 14%, rgba(var(--skin-rgb), 0.13), transparent 30%);
   }
   .skin-card.equipped {
     border-color: rgba(var(--skin-rgb), 0.62);
@@ -593,37 +669,36 @@
     opacity: 0.62;
   }
   .skin-preview {
-    width: 74px;
-    min-width: 74px;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 10px;
   }
   .skin-orb {
     position: relative;
-    width: 58px;
-    height: 58px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     display: grid;
     place-items: center;
     color: #fff;
     font-size: 16px;
-    letter-spacing: 0;
     background:
       radial-gradient(circle at 42% 38%, #fff 0 8%, var(--skin-color) 9% 22%, rgba(var(--skin-rgb),0.42) 43%, transparent 70%),
       radial-gradient(circle, rgba(var(--skin-rgb),0.2), rgba(0,0,0,0.35));
     border: 1px solid rgba(var(--skin-rgb), 0.55);
-    box-shadow: 0 0 22px rgba(var(--skin-rgb), 0.36), inset 0 0 16px rgba(255,255,255,0.08);
+    box-shadow: 0 0 24px rgba(var(--skin-rgb), 0.4), inset 0 0 16px rgba(255,255,255,0.08);
   }
   .skin-orb::before, .skin-orb::after {
     content: '';
     position: absolute;
-    inset: -7px;
+    inset: -6px;
     border-radius: 50%;
     border: 1px solid rgba(var(--skin-rgb), 0.34);
   }
   .skin-orb::after {
-    inset: 8px -10px;
+    inset: 7px -8px;
     border-left-color: transparent;
     border-right-color: transparent;
     transform: rotate(-22deg);
@@ -631,7 +706,7 @@
   .skin-glyph {
     position: relative;
     z-index: 1;
-    font-size: 15px;
+    font-size: 16px;
     color: rgba(255,255,255,0.92);
     text-shadow: 0 0 12px rgba(var(--skin-rgb), 0.85);
   }
@@ -646,13 +721,15 @@
   .preview-harmony::after { border-color: rgba(255,215,115,0.58); transform: rotate(-30deg) scaleX(1.15); }
   .skin-card-info {
     min-width: 0;
-    gap: 4px;
+    width: 100%;
+    gap: 3px;
+    align-items: center;
   }
   .skin-topline {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    gap: 5px;
   }
   .skin-tag {
     flex-shrink: 0;
@@ -660,27 +737,28 @@
     border: 1px solid rgba(var(--skin-rgb), 0.24);
     background: rgba(var(--skin-rgb), 0.08);
     border-radius: 999px;
-    padding: 3px 7px;
-    font-size: 8px;
+    padding: 2px 8px;
+    font-size: 7.5px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
   .skin-card .card-desc {
     color: rgba(220,230,245,0.68);
+    text-align: center;
   }
   .skin-flavor {
-    color: rgba(255,255,255,0.8);
+    display: none; /* hidden in the compact tile - name + tag + status carry the card now */
   }
   .skin-challenge {
-    margin-top: 3px;
+    margin-top: 2px;
     color: rgba(255,255,255,0.46);
+    font-size: 9px;
   }
   .skin-challenge.ready {
     color: rgba(145,255,198,0.86);
   }
   .skin-card .skin-action {
-    align-self: center;
-    min-width: 82px;
+    width: 100%;
     border-color: rgba(var(--skin-rgb), 0.25);
   }
   .skin-card.equipped .skin-action {
@@ -688,7 +766,175 @@
     border-color: rgba(var(--skin-rgb), 0.56);
     background: rgba(var(--skin-rgb), 0.15);
   }
-  
+
+  /* ============== SKIN CAROUSEL ==============
+     One large featured skin at a time instead of a grid - arrows cycle
+     through, dots show position. The featured card reuses .skin-card's
+     visual language (gradient wash, orb, tag) but everything is scaled
+     up since it's the sole focus instead of one tile among many. */
+  .skin-carousel {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0 4px 0;
+  }
+  .skin-carousel-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+  .carousel-arrow {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    color: rgba(225,235,255,0.75);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  }
+  .carousel-arrow:hover {
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.28);
+    color: #fff;
+  }
+  .carousel-arrow:active {
+    transform: scale(0.92);
+  }
+  .carousel-arrow svg { width: 18px; height: 18px; }
+
+  .skin-carousel-stage {
+    width: 380px;
+    height: 380px;
+    flex-shrink: 0;
+  }
+
+  .skin-feature-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    border-radius: 18px;
+    border: 1px solid rgba(var(--skin-rgb), 0.2);
+    padding: 32px 26px 24px 26px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background:
+      radial-gradient(circle at 50% 28%, rgba(var(--skin-rgb), 0.2), transparent 50%),
+      linear-gradient(135deg, rgba(var(--skin-rgb), 0.06), rgba(255,255,255,0.02) 54%, rgba(0,0,0,0.14));
+    animation: skin-feature-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes skin-feature-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .skin-feature-card.no-anim {
+    animation: none;
+  }
+  .skin-feature-card.equipped {
+    border-color: rgba(var(--skin-rgb), 0.6);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08), 0 0 36px rgba(var(--skin-rgb), 0.16);
+  }
+  .skin-feature-card.locked .skin-orb-feature { opacity: 0.65; filter: saturate(0.75); }
+
+  .skin-orb-feature {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+  }
+  .skin-orb-feature .skin-glyph { font-size: 22px; }
+
+  .skin-feature-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 25px;
+    color: #fff;
+    margin: 0 0 8px 0;
+  }
+  .skin-feature-flavor {
+    font-size: 12px;
+    color: rgba(220,230,245,0.7);
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .skin-feature-requirement {
+    width: 100%;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: rgba(255,255,255,0.55);
+    padding: 10px 14px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+    line-height: 1.45;
+  }
+  .skin-feature-requirement.ready {
+    color: rgba(145,255,198,0.92);
+    border-color: rgba(145,255,198,0.28);
+    background: rgba(145,255,198,0.06);
+  }
+  .skin-feature-card .skin-action {
+    width: 100%;
+    margin: 0;
+    flex-shrink: 0;
+    padding: 10px 0;
+    font-size: 12px;
+    border-color: rgba(var(--skin-rgb), 0.3);
+  }
+  .skin-feature-card.equipped .skin-action {
+    color: rgba(255,255,255,0.92);
+    border-color: rgba(var(--skin-rgb), 0.56);
+    background: rgba(var(--skin-rgb), 0.15);
+  }
+
+  .skin-carousel-dots {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  /* Increased top padding and added margin to push it down into the center of the negative space */
+  margin-top: 10px; 
+  padding: 12px 20px 0 20px; 
+}
+  .skin-carousel-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+    padding: 0;
+    margin: 0;
+    border: none;
+    flex-shrink: 0;
+  }
+  .skin-carousel-dot:hover { background: rgba(255,255,255,0.4); }
+  .skin-carousel-dot.active {
+    background: #fff;
+    transform: scale(1.3);
+  }
+
   .btn-back {
     margin-top: 5px;
     background: transparent;
@@ -783,6 +1029,46 @@
     box-shadow: 0 0 12px rgba(158,231,255,0.7);
   }
 
+  /* Universal back button - sits top-right on any screen that Backspace
+     backs out of (replaces the old X close buttons). Styled like a
+     small physical key cap so the shape itself hints at "this is a key
+     you can press", with a real press-depth animation on click so it
+     reads as tactile, not just decorative. */
+  .back-key-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 18px 18px 0 0;
+    z-index: 50;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    color: rgba(225,235,255,0.75);
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .back-key-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.26);
+    color: #fff;
+  }
+  .back-key-btn:active,
+  .back-key-btn.pressed {
+    transform: translateY(1px) scale(0.96);
+    background: rgba(255,255,255,0.1);
+  }
+  .back-key-btn svg {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+  }
+
   /* Settings overlay - grouped sections, each with a small caps-locked
      label, reusing .performance-toggle for on/off rows and a custom
      slider style for volume. */
@@ -790,7 +1076,7 @@
     width: min(440px, 100%);
   }
   .settings-section {
-    margin-bottom: 22px;
+    margin-bottom: 32px;
     text-align: left;
   }
   .settings-section:last-child {
@@ -801,14 +1087,15 @@
     letter-spacing: 0.2em;
     color: rgba(158, 231, 255, 0.6);
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 18px;
   }
   .settings-row-full {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    margin-bottom: 10px;
+    padding: 10px 0;
+    margin-bottom: 4px;
   }
   .settings-row-full:last-child {
     margin-bottom: 0;
@@ -902,7 +1189,7 @@
     transform: translateY(0);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 560px) {
     .shop-content, .shop-content.skin-grid { grid-template-columns: 1fr; }
     .shop-icon-wrapper { width: 42px; height: 42px; font-size: 20px; }
     .skin-card { min-height: 108px; }
@@ -960,6 +1247,7 @@
     border-radius: 6px;
     padding: 36px 32px;
     text-align: center;
+    position: relative;
     box-shadow: 0 30px 70px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.04);
     animation: overlay-card-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
@@ -1113,6 +1401,168 @@
     border-radius: 3px;
     font-size: 11px;
   }
+
+  /* ============== RESULTS SCREEN (formerly "dead screen") ==============
+     Two variants, both borderless / full-bleed - no glass-panel card.
+     - .results-simple: Classic/Inferno losses. Just a number and a line.
+     - .results-boss: Boss Rush/Harmony. A single race-track bar with a
+       moving player icon (colored by equipped skin, with a short fading
+       trail like the real in-game trail) racing toward a fixed boss
+       glyph at the goal end. This is the signature element of the
+       whole redesign - everything else stays quiet around it. */
+  #screen-dead {
+    justify-content: center;
+    min-height: 100%;
+  }
+  .results-headline {
+    font-family: 'Fraunces', serif;
+    font-weight: 200;
+    font-size: 96px;
+    line-height: 1;
+    margin: 0 0 0.15em 0;
+    letter-spacing: -0.01em;
+  }
+  .results-subline {
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(205, 220, 245, 0.6);
+    margin: 0 0 2.6rem 0;
+  }
+
+  .results-track-wrap {
+    width: min(560px, 86vw);
+    margin: 0 auto 2.4rem auto;
+  }
+  .results-track {
+    position: relative;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.1);
+    margin: 30px 0;
+  }
+  .results-track-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    border-radius: 3px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.18), currentColor);
+    width: 0%;
+    transition: width 1.1s cubic-bezier(0.16, 0.8, 0.2, 1);
+  }
+  .results-track-goal {
+    position: absolute;
+    right: -3px;
+    top: 50%;
+    transform: translate(50%, -50%);
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Boss Rush goal icon - small concentric rings, echoing the boss's
+     real in-game silhouette without trying to be a pixel-accurate copy. */
+  .results-track-goal.goal-bossrush {
+    border-radius: 50%;
+  }
+  .results-track-goal.goal-bossrush::before,
+  .results-track-goal.goal-bossrush::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+  }
+  .results-track-goal.goal-bossrush::before { width: 38px; height: 38px; opacity: 0.55; }
+  .results-track-goal.goal-bossrush::after { width: 24px; height: 24px; opacity: 0.85; }
+  .results-track-goal.goal-bossrush .goal-core {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 10px currentColor;
+  }
+  .results-track-goal:not(.goal-bossrush) .goal-core { display: none; }
+  /* Harmony goal icon - a rotated square (diamond) motif, echoing the
+     harmonyTransitions' rotating-rectangle look used in real gameplay. */
+  .results-track-goal.goal-harmony::before,
+  .results-track-goal.goal-harmony::after {
+    content: '';
+    position: absolute;
+    border: 1.5px solid currentColor;
+  }
+  .results-track-goal.goal-harmony::before {
+    width: 26px; height: 26px;
+    transform: rotate(45deg);
+    opacity: 0.85;
+  }
+  .results-track-goal.goal-harmony::after {
+    width: 36px; height: 36px;
+    transform: rotate(45deg);
+    opacity: 0.4;
+  }
+  .results-track-runner {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: left 1.1s cubic-bezier(0.16, 0.8, 0.2, 1);
+    box-shadow: 0 0 14px currentColor;
+  }
+  .results-track-runner::before,
+  .results-track-runner::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    transform: translate(-50%, -50%);
+    opacity: 0.35;
+  }
+  .results-track-runner::before { margin-left: -16px; opacity: 0.22; transform: translate(-50%,-50%) scale(0.7); }
+  .results-track-runner::after { margin-left: -28px; opacity: 0.12; transform: translate(-50%,-50%) scale(0.45); }
+  .results-track-pct {
+    position: absolute;
+    top: -22px;
+    transform: translateX(-50%);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: rgba(225,235,255,0.8);
+    transition: left 1.1s cubic-bezier(0.16, 0.8, 0.2, 1);
+    white-space: nowrap;
+  }
+
+  .results-meta {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    margin-bottom: 2.2rem;
+  }
+  .results-meta-item { text-align: center; }
+  .results-meta-label {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,0.38);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .results-meta-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 200;
+    font-size: 22px;
+  }
+  .results-hint {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: rgba(180, 200, 230, 0.4);
+    text-transform: uppercase;
+    margin-bottom: 2.2rem;
+    min-height: 1.2em;
+  }
 </style>
 </head>
 <body>
@@ -1136,8 +1586,8 @@
     <h2 id="quit-overlay-title">Quit to Menu?</h2>
     <p class="overlay-msg" id="quit-overlay-msg">Your current run will be lost.</p>
     <div class="overlay-actions">
-      <button id="quit-cancel-btn" onclick="closeQuitOverlay()">CANCEL</button>
-      <button class="button-primary" id="quit-confirm-btn" onclick="confirmQuitOverlay()">QUIT</button>
+      <button id="quit-cancel-btn" onclick="closeQuitOverlay()" data-kbnum="1">CANCEL</button>
+      <button class="button-primary" id="quit-confirm-btn" onclick="confirmQuitOverlay()" data-kbnum="2">QUIT</button>
     </div>
   </div>
 </div>
@@ -1145,6 +1595,7 @@
 <!-- Settings - grouped sections, opened from the main menu -->
 <div id="overlay-settings" class="overlay-backdrop">
   <div class="overlay-card settings-card">
+    <button class="back-key-btn" onclick="clickBackKey()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5"/><path d="M19 17l-5-5 5-5"/></svg></button>
     <h2 style="margin-bottom: 22px;">Settings</h2>
 
     <div class="settings-section">
@@ -1185,6 +1636,15 @@
         <div style="display: flex; align-items: center; gap: 12px;">
           <strong id="fps-state" class="volume-value-label">OFF</strong>
           <button id="fps-toggle" class="performance-toggle" onclick="toggleFpsCounter()">
+            <span class="toggle-track"><span class="toggle-knob"></span></span>
+          </button>
+        </div>
+      </div>
+      <div class="settings-row-full" id="settings-row-numbers">
+        <span class="settings-label-text">Show Button Numbers</span>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <strong id="numbers-state" class="volume-value-label">OFF</strong>
+          <button id="numbers-toggle" class="performance-toggle" onclick="toggleButtonNumbers()">
             <span class="toggle-track"><span class="toggle-knob"></span></span>
           </button>
         </div>
@@ -1235,9 +1695,7 @@
     <h1>Graveyard Slide</h1>
     <p class="subtitle" id="loading-status">LOADING ASSETS...</p>
     <div class="loader-bar-container"><div id="loader-progress"></div></div>
-    <p style="font-size: 9px; letter-spacing: 0.22em; color: rgba(180, 200, 230, 0.32); text-transform: uppercase; margin-top: 28px;">
-      P to pause &nbsp;·&nbsp; Backspace to quit / return
-    </p>
+    
   </div>
 
   <div id="hud-top"><span id="coin-amount">0</span></div>
@@ -1252,20 +1710,21 @@
   <div id="screen-main" class="screen">
     <h1 id="main-title">Graveyard Slide</h1>
     <p class="subtitle">ABSTRACT SURVIVAL</p>
-    <button class="button-primary" onclick="nav('modes')">PLAY</button>
-    <button onclick="nav('shop')">SHOP</button>
-    <button onclick="startGame('inferno', true)">BOTPLAY</button>
-    <button onclick="openSettingsOverlay()">SETTINGS</button>
+    <button class="button-primary" onclick="nav('modes')" data-kbnum="1">PLAY</button>
+    <button onclick="nav('shop')" data-kbnum="2">SHOP</button>
+    <button onclick="startGame('inferno', true)" data-kbnum="3">BOTPLAY</button>
+    <button onclick="openSettingsOverlay()" data-kbnum="4">SETTINGS</button>
   </div>
 
   <div id="screen-modes" class="screen">
     <div class="glass-panel modes-panel">
+      <button class="back-key-btn" onclick="clickBackKey()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5"/><path d="M19 17l-5-5 5-5"/></svg></button>
       <div class="glass-header">
         <h2>SELECT RUN</h2>
       </div>
       <div class="glass-content">
         <div class="modes-grid">
-          <div class="mode-card" onclick="startGame('classic')">
+          <div class="mode-card" onclick="startGame('classic')" data-kbnum="1">
             <p class="mode-desc">RELAXING</p>
             <h3>CLASSIC</h3>
             <div class="mode-stat">
@@ -1273,7 +1732,7 @@
               <span id="best-classic" style="color: #fff; font-size: 18px;">0</span>
             </div>
           </div>
-          <div class="mode-card" onclick="startGame('inferno')" style="border-color: rgba(255, 170, 136, 0.2);">
+          <div class="mode-card" onclick="startGame('inferno')" style="border-color: rgba(255, 170, 136, 0.2);" data-kbnum="2">
             <p class="mode-desc" style="color: #ffaa88;">INTENSE</p>
             <h3 style="color: #ffaa88;">INFERNO</h3>
             <div class="mode-stat">
@@ -1281,7 +1740,7 @@
               <span id="best-inferno" style="color: #ffaa88; font-size: 18px;">0</span>
             </div>
           </div>
-          <div class="mode-card" onclick="startGame('bossrush')" style="border-color: rgba(255, 85, 255, 0.2);">
+          <div class="mode-card" onclick="startGame('bossrush')" style="border-color: rgba(255, 85, 255, 0.2);" data-kbnum="3">
   <p class="mode-desc" style="color: #ff55ff;">CHALLENGE</p>
   <!-- Added white-space: nowrap and clamp() font-size to force 1 row -->
   <h3 style="color: #ff55ff; white-space: nowrap; font-size: clamp(16px, 2.2vw, 26px); transform: translateX(-7.7px);">BOSS RUSH</h3>
@@ -1290,11 +1749,11 @@
     <span id="bossrush-stat" style="color: #ff55ff; font-size: 18px;">0%</span>
   </div>
 </div>
-          <div id="impossible-card" class="mode-card" onclick="nav('impossible')" style="border-color: rgba(125, 255, 217, 0.32); background: linear-gradient(180deg, rgba(125, 255, 217, 0.07), rgba(255, 215, 115, 0.025));">
+          <div id="impossible-card" class="mode-card" onclick="nav('impossible')" style="border-color: rgba(125, 255, 217, 0.32); background: linear-gradient(180deg, rgba(125, 255, 217, 0.07), rgba(255, 215, 115, 0.025));" data-kbnum="4">
             <p class="mode-desc" style="color: #7dffd9;">RESONANCE</p>
             <h3 style="color: #f7fbff; transform: translateX(-4px);">HARMONY</h3>
             <div class="mode-stat">
-              <div class="mode-stat-label">STATUS</div>
+              <div class="mode-stat-label">PERFORMANCE</div>
               <span id="impossible-stat" style="color: #ffd773; font-size: 18px;">READY</span>
             </div>
           </div>
@@ -1302,7 +1761,7 @@
             <p class="mode-desc" style="color: #666;">SECRET</p>
             <h3 style="color: #666;">PROTOCOL</h3>
             <div class="mode-stat">
-              <div class="mode-stat-label">STATUS</div>
+              <div class="mode-stat-label">PERFORMANCE</div>
               <span style="color: #666; font-size: 18px;">NULL</span>
             </div>
           </div>
@@ -1312,9 +1771,9 @@
     </div>
 
   <div id="screen-shop" class="screen">
-    <div class="glass-panel">
+    <div class="glass-panel shop-panel">
+      <button class="back-key-btn" onclick="clickBackKey()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5"/><path d="M19 17l-5-5 5-5"/></svg></button>
       <div class="glass-header">
-        <h2>ARMORY</h2>
         <div class="shop-tabs">
           <button id="tab-btn-upgrades" class="active-tab" onclick="switchShopTab('upgrades')">UPGRADES</button>
           <button id="tab-btn-skins" onclick="switchShopTab('skins')">SKINS</button>
@@ -1322,47 +1781,58 @@
       </div>
       <div class="glass-content">
         <div id="tab-upgrades" class="shop-content active"></div>
-        <div id="tab-skins" class="shop-content skin-grid"></div>
+        <div id="tab-skins" class="skin-carousel" style="display: none;">
+          <div class="skin-carousel-row">
+            <button class="carousel-arrow carousel-arrow-left" onclick="cycleSkin(-1)" aria-label="Previous skin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+            <div class="skin-carousel-stage" id="skin-carousel-stage"></div>
+            <button class="carousel-arrow carousel-arrow-right" onclick="cycleSkin(1)" aria-label="Next skin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+          </div>
+          <div class="skin-carousel-dots" id="skin-carousel-dots"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="screen-impossible" class="screen">
     <div class="glass-panel" style="max-width: 500px; padding: 40px;">
+      <button class="back-key-btn" onclick="clickBackKey()" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5"/><path d="M19 17l-5-5 5-5"/></svg></button>
       <h2 style="color: #f7fbff; margin-bottom: 10px;">HARMONY</h2>
-      <p class="subtitle" style="color: #7dffd9; margin-bottom: 30px;">LEVEL: RESONANCE</p>
+      
       <p style="font-size: 12px; color: #d9e7ef; margin-bottom: 40px; line-height: 1.6;">A final pattern bends the arena into chords, echoes, and moving gaps. Hold the line until the signal resolves.</p>
       <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-        <button class="button-primary" onclick="startGame('impossible')" style="background: rgba(125, 255, 217, 0.15); border-color: rgba(125, 255, 217, 0.45); color: #eafff8;">START HARMONY</button>
-        <button onclick="startGame('impossible', true)">SIMULATE (BOTPLAY)</button>
+        <button class="button-primary" onclick="startGame('impossible')" style="background: rgba(125, 255, 217, 0.15); border-color: rgba(125, 255, 217, 0.45); color: #eafff8;" data-kbnum="1">START</button>
+        <button onclick="startGame('impossible', true)" data-kbnum="2">BOTPLAY</button>
       </div>
     </div>
   </div>
 
   <div id="screen-dead" class="screen">
-    <div class="glass-panel" style="max-width: 600px; align-items: center; padding: 60px 40px;">
-      <h1 id="dead-score" style="font-size: 80px; margin-bottom: 0.1em;">0</h1>
-      <p class="subtitle" id="dead-subtitle" style="margin-bottom: 2.5rem;">BEST 0</p>
+    <h1 class="results-headline" id="dead-score">0</h1>
+    <p class="results-subline" id="dead-subtitle">BEST 0</p>
 
-      <div id="dead-stats" style="display:flex; gap: 40px; margin-bottom: 2.5rem; align-items: center; background: rgba(255,255,255,0.03); padding: 20px 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
-        <div style="text-align: center;">
-          <div style="font-size: 9px; letter-spacing: 0.25em; color: rgba(255,255,255,0.4); margin-bottom: 6px; text-transform: uppercase;">EARNED</div>
-          <div id="dead-coins" style="font-family: 'Fraunces', serif; font-weight: 200; font-size: 32px; color: #ffd700;">+0</div>
-        </div>
-        <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
-        <div style="text-align: center;">
-          <div style="font-size: 9px; letter-spacing: 0.25em; color: rgba(255,255,255,0.4); margin-bottom: 6px; text-transform: uppercase;">TOTAL</div>
-          <div id="dead-total" style="font-family: 'Fraunces', serif; font-weight: 200; font-size: 32px;">0</div>
-        </div>
-      </div>
-
-      <p id="dead-hint" style="font-size: 10px; letter-spacing: 0.2em; color: rgba(180, 200, 230, 0.4); margin-bottom: 2.5rem; text-transform: uppercase; min-height: 1.2em;"></p>
-
-      <div style="display: flex; gap: 15px; width: 100%; justify-content: center;">
-        <button onclick="startGame(currentMode)" style="flex: 1; max-width: 200px; background: #fff; color: #000; font-weight: 600;">PLAY AGAIN</button>
-        <button onclick="nav('main')" style="flex: 1; max-width: 200px;">MAIN MENU</button>
+    <div class="results-track-wrap" id="dead-track-wrap" style="display: none;">
+      <div class="results-track">
+        <span class="results-track-pct" id="dead-track-pct">0%</span>
+        <div class="results-track-fill" id="dead-track-fill"></div>
+        <div class="results-track-runner" id="dead-track-runner"></div>
+        <div class="results-track-goal" id="dead-track-goal"><span class="goal-core"></span></div>
       </div>
     </div>
+
+    <div class="results-meta">
+      <div class="results-meta-item">
+        <div class="results-meta-label">Earned</div>
+        <div class="results-meta-value" id="dead-coins" style="color: #ffd700;">+0</div>
+      </div>
+      <div class="results-meta-item">
+        <div class="results-meta-label">Total</div>
+        <div class="results-meta-value" id="dead-total">0</div>
+      </div>
+    </div>
+
+    <p class="results-hint" id="dead-hint"></p>
+
+    <button class="button-primary" onclick="startGame(currentMode)" style="max-width: 220px;">PLAY AGAIN</button>
   </div>
 
 </div>
@@ -1418,7 +1888,11 @@
       doublePointsCollected: 0,
       infernoBossKills: 0,
       bestInfernoBossStreak: 0,
-      bossRushWins: 0
+      bossRushWins: 0,
+      orbsDuringDoublePoints: 0,
+      shieldBlocks: 0,
+      ghostRevives: 0,
+      bestBotplayStreak: 0
     }
   };
   
@@ -1443,6 +1917,7 @@
   if(savedData.boostsDisabled === undefined) savedData.boostsDisabled = false;
   if(savedData.performanceMode === undefined) savedData.performanceMode = false;
   if(savedData.showFps === undefined) savedData.showFps = false;
+  if(savedData.showButtonNumbers === undefined) savedData.showButtonNumbers = false;
   if(savedData.musicVolume === undefined) savedData.musicVolume = 0.7;
   if(savedData.sfxVolume === undefined) savedData.sfxVolume = 0.7;
   if(savedData.lastSeenWhatsNewVersion === undefined) savedData.lastSeenWhatsNewVersion = null;
@@ -1475,6 +1950,7 @@
     updateCoinUI();
     updatePerformanceUI();
     updateFpsUI();
+    updateButtonNumbersUI();
   }
   window.saveData = saveData;
 
@@ -1534,6 +2010,27 @@
     tone(savedData.showFps ? 660 : 360, 0.06, 'sine', 0.07);
   }
 
+  function showButtonNumbers() {
+    return savedData.showButtonNumbers === true;
+  }
+  window.showButtonNumbers = showButtonNumbers;
+
+  function updateButtonNumbersUI() {
+    const enabled = showButtonNumbers();
+    document.body.classList.toggle('show-kb-numbers', enabled);
+    const toggle = document.getElementById('numbers-toggle');
+    const stateEl = document.getElementById('numbers-state');
+    if (toggle) toggle.classList.toggle('active', enabled);
+    if (stateEl) stateEl.textContent = enabled ? 'ON' : 'OFF';
+  }
+  window.updateButtonNumbersUI = updateButtonNumbersUI;
+  window.toggleButtonNumbers = function() {
+    savedData.showButtonNumbers = !showButtonNumbers();
+    updateButtonNumbersUI();
+    saveData();
+    tone(savedData.showButtonNumbers ? 660 : 360, 0.06, 'sine', 0.07);
+  }
+
   function musicVolume() {
     return typeof savedData.musicVolume === 'number' ? savedData.musicVolume : 0.7;
   }
@@ -1585,8 +2082,7 @@
   updateCoinUI();
   updatePerformanceUI();
   updateFpsUI();
-
-  // --- KONFIGURACIJA TRGOVINE ---
+  updateButtonNumbersUI();
   const upgradeConfig = {
     magnet: { name: 'Magnet', basePrice: 5, max: 5, desc: 'Larger range each level. Pulls orbs in gently from farther away.' },
     orbValue: { name: 'Resonance', basePrice: 15, max: 3, desc: 'Each level adds +1 coin per collected orb.' },
@@ -1598,22 +2094,17 @@
   const magnetPullSpeeds = [0, 18, 23, 28, 34, 40];
 
   const skinConfig = {
-    default: { name: 'Drifter', category: 'Starter', flavor: 'Clean blue-white comet for the first slide.', glyph: 'D', color: '#ffffff', trail: '140,210,255', price: 0, trailType: 'default', preview: 'default' },
-    flare: { name: 'Fireline', category: 'Standard', flavor: 'A shop-forged ember trail with hot sparks.', glyph: 'F', color: '#ffd0a0', trail: '255,92,42', price: 25, trailType: 'fire', preview: 'fire', unlock: 'standard' },
-    volt: { name: 'Voltrun', category: 'Standard', flavor: 'Sharp electric arcs for risky cuts.', glyph: 'V', color: '#eaffff', trail: '120,220,255', price: 30, trailType: 'electric', preview: 'electric', unlock: 'standard' },
-    glitch: { name: 'Databreak', category: 'Standard', flavor: 'A broken signal with jittering pixels.', glyph: 'G', color: '#f6f7ff', trail: '255,75,230', price: 35, trailType: 'glitch', preview: 'glitch', unlock: 'standard' },
-    aurora: { name: 'Aurora', category: 'Standard', flavor: 'Soft color bands for stylish long runs.', glyph: 'A', color: '#e8fff8', trail: '120,255,214', price: 45, trailType: 'rainbow', preview: 'rainbow', unlock: 'standard' },
-    frost: { name: 'Frostbite', category: 'Standard', flavor: 'Cold shards and a clean icy wake.', glyph: 'I', color: '#ecfbff', trail: '130,215,255', price: 55, trailType: 'ice', preview: 'electric', unlock: 'standard' },
-    prism: { name: 'Classic Prism', category: 'Classic', flavor: 'Unlocked by proving you can keep Classic alive.', glyph: 'C', color: '#f1f4ff', trail: '170,190,255', price: 20, trailType: 'rainbow', preview: 'rainbow' },
-    rose: { name: 'Inferno Rose', category: 'Inferno', flavor: 'A thick rose burn for surviving Inferno pressure.', glyph: 'R', color: '#ffc2d0', trail: '255,96,128', price: 35, trailType: 'thick', preview: 'fire' },
-    mint: { name: 'Chrono Mint', category: 'Slowmo', flavor: 'Clock rings for players who master time boosts.', glyph: 'T', color: '#d8fff0', trail: '110,255,210', price: 50, trailType: 'chrono', preview: 'default' },
-    void: { name: 'Afterimage', category: 'Deaths', flavor: 'A ghost trail earned by coming back after failures.', glyph: 'X', color: '#d6d2ff', trail: '102,92,255', price: 80, trailType: 'ghost', preview: 'ghost' },
-    ember: { name: 'Hellbreaker', category: 'Inferno Boss', flavor: 'Boss-killer fire with a harder molten core.', glyph: 'B', color: '#ffe0ba', trail: '255,110,42', price: 100, trailType: 'fire', preview: 'fire' },
-    mono: { name: 'Aegis Mono', category: 'Shield', flavor: 'A shield-white orbit for defensive runs.', glyph: 'M', color: '#f2f7ff', trail: '195,220,255', price: 120, trailType: 'shield', preview: 'ghost' },
-    storm: { name: 'Goldstorm', category: 'Double Points', flavor: 'Coin-gold surges from double-point pickups.', glyph: '2', color: '#fff1a3', trail: '255,214,88', price: 150, trailType: 'gold', preview: 'electric' },
-    phantom: { name: 'Boss Phantom', category: 'Boss Rush', flavor: 'Wide echo pulses from clearing Boss Rush.', glyph: 'P', color: '#ffd6ff', trail: '255,0,255', price: 200, trailType: 'echo', preview: 'ghost' },
-    pulse: { name: 'Pulse Runner', category: 'Boss Rush', flavor: 'A neon heartbeat earned by clearing Boss Rush in a flash.', glyph: 'S', color: '#bffff2', trail: '0,255,204', price: 250, trailType: 'neon', preview: 'default' },
-    harmony: { name: 'Resonance', category: 'Harmony', flavor: 'Linked cyan, gold, and violet chords from beating Harmony.', glyph: 'H', color: '#f6fff9', trail: '125,255,217', price: 300, trailType: 'harmony', preview: 'harmony' }
+    default: { name: 'The Drifter', category: 'Starter', flavor: 'A crisp white circle with a bright cyan core. Where every slide begins.', glyph: 'D', color: '#ffffff', trail: '140,210,255', price: 0, trailType: 'default', preview: 'default' },
+    singularity: { name: 'Singularity', category: 'Fundamentals', flavor: 'A pulsing black hole with a deep violet event horizon, warping everything nearby.', glyph: '●', color: '#caa6ff', trail: '120,60,220', price: 0, trailType: 'singularity', preview: 'ghost' },
+    avarice: { name: 'Avarice', category: 'Fundamentals', flavor: 'A brilliant emerald-and-gold diamond that leaves a trail of falling coins.', glyph: '◆', color: '#ffe79a', trail: '255,210,90', price: 0, trailType: 'coins', preview: 'electric' },
+    timeweaver: { name: 'Time Weaver', category: 'Mastery of the Grid', flavor: 'A pale amber hourglass that drops faint clock ticks in its wake.', glyph: '⏳', color: '#ffd98c', trail: '255,205,120', price: 0, trailType: 'chrono', preview: 'default' },
+    aegis: { name: 'Aegis Vanguard', category: 'Mastery of the Grid', flavor: 'A cyan hexagon ringed by a rotating shield. Forged from surviving the unsurvivable.', glyph: '⬡', color: '#bdeaff', trail: '120,220,255', price: 0, trailType: 'shield', preview: 'ghost' },
+    specter: { name: 'The Specter', category: 'Mastery of the Grid', flavor: 'A shattered, translucent orb in ghostly teal, leaving faint afterimages behind.', glyph: '◌', color: '#bdfff0', trail: '150,255,225', price: 0, trailType: 'ghost', preview: 'ghost' },
+    zenith: { name: 'Zenith', category: 'The Crucible', flavor: 'A sleek sky-blue chevron with a feather-light wisp that grows with your combo.', glyph: '➤', color: '#bfe6ff', trail: '120,200,255', price: 0, trailType: 'zenith', preview: 'electric' },
+    obsidian: { name: 'Obsidian Flare', category: 'The Crucible', flavor: 'A jagged molten ember shifting between ash black and crimson, spitting embers.', glyph: '▲', color: '#ff8a5c', trail: '255,80,40', price: 0, trailType: 'obsidian', preview: 'fire' },
+    apex: { name: 'Apex Predator', category: 'The Crucible', flavor: 'An inverted triangle in a pulsing magenta ring, echoing the bosses you have slain.', glyph: '▽', color: '#ff7ef5', trail: '255,0,255', price: 0, trailType: 'apex', preview: 'ghost' },
+    resonance: { name: 'Absolute Resonance', category: 'The Crucible', flavor: 'Three concentric rings in cyan, gold, and violet, pulsing in perfect rhythm.', glyph: '◎', color: '#f6fff9', trail: '125,255,217', price: 0, trailType: 'harmony', preview: 'harmony' },
+    architect: { name: 'The Architect', category: 'The Anomaly', flavor: 'A rigid terminal-green square trailing cascading binary code.', glyph: '▣', color: '#7dffa0', trail: '90,255,140', price: 0, trailType: 'binary', preview: 'glitch' }
   };
   if (!skinConfig[savedData.currentSkin]) savedData.currentSkin = 'default';
 
@@ -1633,57 +2124,59 @@
 
     const stats = savedData.stats || {};
     const br = bossRushRecord();
+    const magnetLvl = savedData.upgrades.magnet || 0;
+    const magnetMax = (upgradeConfig.magnet && upgradeConfig.magnet.max) || 5;
     const challenges = {
       default: { label: 'Unlocked', done: true, progress: 'READY' },
-      prism: {
-        label: 'Score 300 in Classic',
-        done: savedData.bestClassic >= 300,
-        progress: progressLabel(savedData.bestClassic, 300)
+      singularity: {
+        label: 'Fully upgrade the Magnet',
+        done: magnetLvl >= magnetMax,
+        progress: progressLabel(magnetLvl, magnetMax)
       },
-      rose: {
-        label: 'Score 450 in Inferno',
-        done: savedData.bestInferno >= 450,
-        progress: progressLabel(savedData.bestInferno, 450)
+      avarice: {
+        label: 'Collect 75 Orbs during Double Points',
+        done: (stats.orbsDuringDoublePoints || 0) >= 75,
+        progress: progressLabel(stats.orbsDuringDoublePoints, 75)
       },
-      mint: {
-        label: 'Collect 10 Slowmo boosts',
-        done: stats.slowmoCollected >= 10,
-        progress: progressLabel(stats.slowmoCollected, 10)
+      timeweaver: {
+        label: 'Collect 50 Slowmo boosts',
+        done: (stats.slowmoCollected || 0) >= 50,
+        progress: progressLabel(stats.slowmoCollected, 50)
       },
-      void: {
-        label: 'Die 8 times',
-        done: stats.deaths >= 8,
-        progress: progressLabel(stats.deaths, 8)
+      aegis: {
+        label: 'Block 25 hits with Shield',
+        done: (stats.shieldBlocks || 0) >= 25,
+        progress: progressLabel(stats.shieldBlocks, 25)
       },
-      ember: {
-        label: 'Beat 2 Inferno bosses in one run',
-        done: stats.bestInfernoBossStreak >= 2,
+      specter: {
+        label: 'Trigger 50 Ghost revives',
+        done: (stats.ghostRevives || 0) >= 50,
+        progress: progressLabel(stats.ghostRevives, 50)
+      },
+      zenith: {
+        label: 'Score 500 in Classic mode',
+        done: savedData.bestClassic >= 500,
+        progress: progressLabel(savedData.bestClassic, 500)
+      },
+      obsidian: {
+        label: 'Kill 2 bosses in an Inferno run',
+        done: (stats.bestInfernoBossStreak || 0) >= 2,
         progress: progressLabel(stats.bestInfernoBossStreak, 2)
       },
-      mono: {
-        label: 'Collect 10 Shields',
-        done: stats.shieldCollected >= 10,
-        progress: progressLabel(stats.shieldCollected, 10)
+      apex: {
+        label: 'Win Boss Rush 5 times',
+        done: (stats.bossRushWins || 0) >= 5,
+        progress: progressLabel(stats.bossRushWins, 5)
       },
-      storm: {
-        label: 'Collect 10 Double Points',
-        done: stats.doublePointsCollected >= 10,
-        progress: progressLabel(stats.doublePointsCollected, 10)
-      },
-      phantom: {
-        label: 'Beat Boss Rush once',
-        done: !!br.beaten,
-        progress: br.beaten ? '1/1' : '0/1'
-      },
-      pulse: {
-        label: `Beat Boss Rush in under ${BOSS_RUSH_SPEED_THRESHOLD}s`,
-        done: (br.bestTime || 999999) <= BOSS_RUSH_SPEED_THRESHOLD,
-        progress: (br.bestTime || 999999) <= BOSS_RUSH_SPEED_THRESHOLD ? 'CLEARED' : (br.bestTime && br.bestTime < 999999 ? formatTime(br.bestTime) : '0/1')
-      },
-      harmony: {
-        label: 'Beat Harmony',
+      resonance: {
+        label: 'Beat Harmony mode',
         done: !!savedData.impossibleBeaten,
         progress: savedData.impossibleBeaten ? 'RESOLVED' : '0/1'
+      },
+      architect: {
+        label: 'Run Botplay for 10 minutes',
+        done: (stats.bestBotplayStreak || 0) >= 600,
+        progress: progressLabel(stats.bestBotplayStreak, 600, 's')
       }
     };
     return challenges[key] || { label: 'Challenge unavailable', done: false, progress: '0/1' };
@@ -1725,7 +2218,7 @@
       prompt.style.fontSize = '12px';
       prompt.style.letterSpacing = '0.3em';
       prompt.style.opacity = '0.6';
-      prompt.textContent = 'CLICK ANYWHERE TO BEGIN';
+      prompt.textContent = 'PRESS ANY KEY OR CLICK TO BEGIN';
       loadingScreen.appendChild(prompt);
 
       document.addEventListener('click', () => {
@@ -1837,6 +2330,7 @@
     document.getElementById('screen-' + screenName).classList.add('active');
     state = 'menu';
     botplay = false; // botplay is a transient demo state - never let it
+    botplayStreakTimer = 0;
                       // persist once we're back at any menu screen, or
                       // every !botplay check elsewhere in the game (and
                       // the Backspace handler) stays silently broken
@@ -1877,16 +2371,17 @@
         impStat.innerHTML = '<span style="color: #ffd773;">READY</span>';
       }
     }
+    if (window.kbResetFocus) window.kbResetFocus(screenName);
   }
 
   window.switchShopTab = function(tab) {
     document.getElementById('tab-btn-upgrades').classList.remove('active-tab');
     document.getElementById('tab-btn-skins').classList.remove('active-tab');
     document.getElementById('tab-btn-' + tab).classList.add('active-tab');
-    
-    document.getElementById('tab-upgrades').classList.remove('active');
-    document.getElementById('tab-skins').classList.remove('active');
-    document.getElementById('tab-' + tab).classList.add('active');
+
+    document.getElementById('tab-upgrades').classList.toggle('active', tab === 'upgrades');
+    document.getElementById('tab-skins').style.display = tab === 'skins' ? 'flex' : 'none';
+    if (window.kbResetFocus) window.kbResetFocus('shop');
   }
 
   // SVG glyphs for upgrade cards - thin stroke style to match the game's geometric aesthetic
@@ -1932,57 +2427,123 @@
         <div class="shop-icon-wrapper">${upgradeIcons[key] || ''}</div>
 	        <div class="shop-card-info">
 	            <h3>${cfg.name}</h3>
-	            <div style="margin-bottom: 5px;">${pips}</div>
+	            <div style="margin-bottom: 2px;">${pips}</div>
 	            <p class="card-desc">${detail}</p>
 	        </div>
-	        ${btnHtml}
+	        <div class="shop-card-footer">${btnHtml}</div>
 	      `;
       upgContainer.appendChild(card);
     }
 
-    const skinContainer = document.getElementById('tab-skins');
-    skinContainer.innerHTML = '';
-    for(let key in skinConfig) {
-      let cfg = skinConfig[key];
-      let isOwned = savedData.unlockedSkins.includes(key);
-      let isEquipped = savedData.currentSkin === key;
-      let challenge = getSkinChallenge(key);
-
-      let card = document.createElement('div');
-      const stateClass = isEquipped ? 'equipped' : (isOwned ? 'owned' : (challenge.done ? 'ready' : 'locked'));
-      card.className = `shop-card skin-card ${stateClass}`;
-      card.style.setProperty('--skin-color', cfg.color);
-      card.style.setProperty('--skin-rgb', cfg.trail);
-
-      let btnHtml = '';
-      if(isEquipped) btnHtml = `<button class="skin-action" disabled>ACTIVE</button>`;
-      else if(isOwned) btnHtml = `<button class="skin-action" onclick="equipSkin(\'${key}\')">USE</button>`;
-      else if(!challenge.done) btnHtml = `<button class="skin-action" disabled>LOCKED</button>`;
-      else btnHtml = `<button class="skin-action" ${savedData.coins < cfg.price ? 'disabled' : ''} onclick="buySkin(\'${key}\', ${cfg.price})">○ ${cfg.price}</button>`;
-
-      const trailLabel = cfg.trailType.charAt(0).toUpperCase() + cfg.trailType.slice(1);
-      const challengeClass = challenge.done ? 'ready' : '';
-      const challengeText = key === 'default'
-        ? 'Unlocked from the start'
-        : `${challenge.label} · ${challenge.progress}`;
-
-      card.innerHTML = `
-        <div class="skin-preview">
-          <div class="skin-orb preview-${cfg.preview || cfg.trailType}"><span class="skin-glyph">${cfg.glyph || cfg.name.charAt(0)}</span></div>
-        </div>
-        <div class="shop-card-info skin-card-info">
-          <div class="skin-topline">
-            <h3>${cfg.name}</h3>
-            <span class="skin-tag">${cfg.category || 'Skin'}</span>
-          </div>
-          <p class="card-desc skin-flavor">${cfg.flavor || `${trailLabel} trail style.`}</p>
-          <p class="card-desc skin-challenge ${challengeClass}">${trailLabel} trail · ${challengeText}</p>
-        </div>
-        ${btnHtml}
-      `;
-      skinContainer.appendChild(card);
-    }
+    renderSkinCarouselDots();
+    renderSkinCarousel();
+    if (window.kbApplyFocus) window.kbApplyFocus();
   }
+
+  let skinCarouselIndex = 0;
+
+  function renderSkinCarousel(previewIndex) {
+    const stage = document.getElementById('skin-carousel-stage');
+    const keys = Object.keys(skinConfig);
+
+    if (skinCarouselIndex >= keys.length) skinCarouselIndex = 0;
+    if (skinCarouselIndex < 0) skinCarouselIndex = keys.length - 1;
+
+    // previewIndex lets hovering a dot show a skin without committing
+    // to it - moving the mouse away re-renders the real selection.
+    const showIndex = (typeof previewIndex === 'number') ? previewIndex : skinCarouselIndex;
+
+    const key = keys[showIndex];
+    const cfg = skinConfig[key];
+    const isOwned = savedData.unlockedSkins.includes(key);
+    const isEquipped = savedData.currentSkin === key;
+    const challenge = getSkinChallenge(key);
+    const stateClass = isEquipped ? 'equipped' : (isOwned ? 'owned' : (challenge.done ? 'ready' : 'locked'));
+
+    let btnHtml = '';
+    if (isEquipped) btnHtml = `<button class="skin-action" disabled>ACTIVE</button>`;
+    else if (isOwned) btnHtml = `<button class="skin-action" onclick="equipSkin('${key}')">USE</button>`;
+    else if (!challenge.done) btnHtml = `<button class="skin-action" disabled>LOCKED</button>`;
+    else if (cfg.price > 0) btnHtml = `<button class="skin-action" ${savedData.coins < cfg.price ? 'disabled' : ''} onclick="buySkin('${key}', ${cfg.price})">○ ${cfg.price}</button>`;
+    else btnHtml = `<button class="skin-action" onclick="buySkin('${key}', 0)">UNLOCK</button>`;
+
+    // Full requirement text, always visible here - this is the
+    // dedicated single-skin view, so there's room to actually explain
+    // what's needed rather than condensing it like the old grid did.
+    let requirementHtml = '';
+    if (key === 'default') {
+      requirementHtml = `<div class="skin-feature-requirement ready">Unlocked from the start</div>`;
+    } else if (isOwned) {
+      const trailLabel = cfg.trailType.charAt(0).toUpperCase() + cfg.trailType.slice(1);
+      requirementHtml = `<div class="skin-feature-requirement ready">${trailLabel} trail equipped</div>`;
+    } else {
+      const reqClass = challenge.done ? 'ready' : '';
+      requirementHtml = `<div class="skin-feature-requirement ${reqClass}">${challenge.label} — ${challenge.progress}</div>`;
+    }
+
+    const isPreview = typeof previewIndex === 'number';
+    stage.innerHTML = `
+      <div class="skin-feature-card ${stateClass} ${isPreview ? 'no-anim' : ''}" style="--skin-color: ${cfg.color}; --skin-rgb: ${cfg.trail};">
+        <div class="skin-orb-feature skin-orb preview-${cfg.preview || cfg.trailType}"><span class="skin-glyph">${cfg.glyph || cfg.name.charAt(0)}</span></div>
+        <h3 class="skin-feature-name">${cfg.name}</h3>
+        <span class="skin-tag" style="margin-bottom: 14px;">${cfg.category || 'Skin'}</span>
+        <p class="skin-feature-flavor">${cfg.flavor || ''}</p>
+        ${requirementHtml}
+        ${btnHtml}
+      </div>
+    `;
+
+    // Only refresh which dot is marked active - never rebuild the dots'
+    // own markup here, or the dot under the cursor would be destroyed
+    // and recreated mid-hover, which breaks mouseenter/mouseleave.
+    document.querySelectorAll('.skin-carousel-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === showIndex);
+    });
+  }
+
+  function renderSkinCarouselDots() {
+    const dotsWrap = document.getElementById('skin-carousel-dots');
+    const keys = Object.keys(skinConfig);
+    dotsWrap.innerHTML = keys.map((k, i) =>
+      `<button class="skin-carousel-dot ${i === skinCarouselIndex ? 'active' : ''}" onclick="goToSkin(${i})" onmouseenter="previewSkin(${i})" onmouseleave="previewSkin(null)" aria-label="${skinConfig[k].name}"></button>`
+    ).join('');
+  }
+
+  window.cycleSkin = function(direction) {
+    skinCarouselIndex += direction;
+    renderSkinCarousel();
+    tone(direction > 0 ? 520 : 460, 0.05, 'sine', 0.08);
+  };
+
+  window.goToSkin = function(index) {
+    skinCarouselIndex = index;
+    renderSkinCarousel();
+    tone(490, 0.05, 'sine', 0.08);
+  };
+
+  // Hovering a dot briefly shows that skin's card without committing
+  // to it - lets the player flip through the look of every skin just
+  // by sweeping the mouse across the dots, no clicking required.
+  // Called with null on mouseleave to revert to the real selection -
+  // renderSkinCarousel already treats any non-number as "not a preview".
+  //
+  // The revert itself is delayed slightly and cancellable: scrubbing
+  // quickly from one dot straight to an adjacent one would otherwise
+  // flash the real selection in the gap between leaving one dot and
+  // entering the next, which looked jumpy. Entering a new dot cancels
+  // any pending revert before it fires.
+  let skinPreviewRevertTimer = null;
+
+  window.previewSkin = function(index) {
+    clearTimeout(skinPreviewRevertTimer);
+    if (index === null) {
+      skinPreviewRevertTimer = setTimeout(() => {
+        renderSkinCarousel(null);
+      }, 120);
+    } else {
+      renderSkinCarousel(index);
+    }
+  };
 
   window.buyUpgrade = function(key, price) {
     if(savedData.coins >= price && savedData.upgrades[key] < upgradeConfig[key].max) {
@@ -2076,14 +2637,6 @@
       // regardless of our own keydown handling. Backspace has no such
       // conflict and isn't used anywhere else in this game.
       handleQuitKey();
-    }
-
-    if (key === 'p' && !botplay && state === 'playing') {
-      togglePause();
-    } else if (key === 'p' && isPaused) {
-      // allow un-pausing even if `state` has technically changed
-      // underneath (shouldn't normally happen, but stay safe)
-      togglePause();
     }
 
     if (key === 'k' && boss) {
@@ -2534,6 +3087,11 @@
   let bossKills = 0;
   let bossCooldown = 0;
   let botplay = false;
+  let botplayStreakTimer = 0;
+  window.isBotplayActive = () => botplay; // accessor for other script
+                                           // blocks - `let botplay` itself
+                                           // doesn't cross script-tag
+                                           // boundaries, this closure does
   let isVictory = false;
   let ghostCharges = 0;
   let invulnTimer = 0;
@@ -2819,9 +3377,12 @@
     
     const deadScore = document.getElementById('dead-score');
     const deadSubtitle = document.getElementById('dead-subtitle');
+    const trackWrap = document.getElementById('dead-track-wrap');
 
     if (currentMode === 'impossible') {
+      let percent;
       if (isVictory) {
+        percent = 100;
         deadScore.textContent = "100%";
         deadSubtitle.textContent = "HARMONY RESOLVED · " + formatTime(bossRushTimer);
         deadSubtitle.style.color = "#7dffd9";
@@ -2832,7 +3393,7 @@
       } else {
         const hpLeft = boss ? boss.hp : 0;
         const maxHp = boss ? boss.maxHp : 1;
-        const percent = Math.floor((1 - hpLeft / maxHp) * 100);
+        percent = Math.floor((1 - hpLeft / maxHp) * 100);
         deadScore.textContent = percent + "%";
         deadSubtitle.textContent = "RESONANCE BROKEN";
         deadSubtitle.style.color = "#ff6cff";
@@ -2840,9 +3401,13 @@
           savedData.impossibleBestPercent = percent;
         }
       }
+      setResultsTrack(percent, 'harmony', isVictory ? '#7dffd9' : '#ff6cff');
+      trackWrap.style.display = 'block';
     } else if (currentMode === 'bossrush') {
       const prog = savedData.bossProgress[currentBossIndex];
+      let percent;
       if (isVictory) {
+        percent = 100;
         deadScore.textContent = "100%";
         deadSubtitle.textContent = "CHALLENGE SUCCEEDED · " + formatTime(bossRushTimer);
         deadSubtitle.style.color = "#55ff55";
@@ -2854,12 +3419,14 @@
       } else {
         const hpLeft = boss ? boss.hp : 0;
         const maxHp = boss ? boss.maxHp : 1;
-        const percent = Math.floor((1 - hpLeft / maxHp) * 100);
+        percent = Math.floor((1 - hpLeft / maxHp) * 100);
         deadScore.textContent = percent + "%";
         deadSubtitle.textContent = "CHALLENGE FAILED";
         deadSubtitle.style.color = "#ff5555";
         if (percent > prog.bestPercent) prog.bestPercent = percent;
       }
+      setResultsTrack(percent, 'bossrush', isVictory ? '#55ff55' : '#ff5555');
+      trackWrap.style.display = 'block';
     } else {
       let isBest = false;
       if (currentMode === 'classic') {
@@ -2871,6 +3438,7 @@
       let bestScoreDisplay = currentMode === 'inferno' ? savedData.bestInferno : savedData.bestClassic;
       deadSubtitle.textContent = (isBest ? 'NEW RECORD: ' : `BEST (${currentMode.toUpperCase()}): `) + Math.floor(bestScoreDisplay);
       deadSubtitle.style.color = "";
+      trackWrap.style.display = 'none';
     }
 
     if(!botplay) saveData();
@@ -2915,6 +3483,51 @@
     scoreHud.classList.remove('show');
     if (runHud) runHud.classList.remove('show');
     document.getElementById('screen-dead').classList.add('active');
+    if (window.kbResetFocus) window.kbResetFocus('dead');
+  }
+
+  // Drives the Cuphead-style results track: positions the player-icon
+  // "runner" at the given percent along the bar, colored to match the
+  // currently equipped skin (so it's recognizably "you"), sets the
+  // fixed goal icon's letter/color, and updates the floating percent
+  // label above the runner. Called for Boss Rush and Harmony results;
+  // Classic/Inferno hide the track entirely instead.
+  function setResultsTrack(percent, bossType, goalColor) {
+    const clamped = Math.max(0, Math.min(100, percent));
+    const fill = document.getElementById('dead-track-fill');
+    const runner = document.getElementById('dead-track-runner');
+    const pctLabel = document.getElementById('dead-track-pct');
+    const goal = document.getElementById('dead-track-goal');
+
+    const skin = skinConfig[savedData.currentSkin] || skinConfig.default;
+
+    fill.style.width = clamped + '%';
+    fill.style.color = skin.color;
+
+    runner.style.left = clamped + '%';
+    runner.style.color = skin.color;
+    runner.style.background = skin.color;
+
+    pctLabel.style.left = clamped + '%';
+    pctLabel.textContent = Math.round(clamped) + '%';
+
+    goal.classList.remove('goal-bossrush', 'goal-harmony');
+    goal.classList.add(bossType === 'harmony' ? 'goal-harmony' : 'goal-bossrush');
+    goal.style.color = goalColor;
+
+    // Animate from 0 on each fresh results screen, rather than jumping
+    // straight to the final value - this is what makes it read as a
+    // race finishing rather than a static bar.
+    fill.style.width = '0%';
+    runner.style.left = '0%';
+    pctLabel.style.left = '0%';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        fill.style.width = clamped + '%';
+        runner.style.left = clamped + '%';
+        pctLabel.style.left = clamped + '%';
+      });
+    });
   }
 
   function updateRunHud() {
@@ -3017,8 +3630,8 @@
 
   // Called continuously (via setMouse) while paused, so the ring lights
   // up the moment the cursor enters range, before the player even
-  // presses P - so they know they CAN resume, rather than finding out
-  // only after a failed attempt.
+  // presses Backspace - so they know they CAN resume, rather than
+  // finding out only after a failed attempt.
   function updateUnpauseRingState() {
     const ring = document.getElementById('unpause-ring');
     if (!ring) return;
@@ -3118,6 +3731,10 @@
 
       // Smooth Botplay AI
       if(botplay) {
+          botplayStreakTimer += dt;
+          if (state === 'playing' && botplayStreakTimer > (savedData.stats.bestBotplayStreak || 0)) {
+            savedData.stats.bestBotplayStreak = botplayStreakTimer;
+          }
           // Cheat key 'K' for testing Impossible Mode: deals 20% damage per second
           if (currentMode === 'impossible' && boss && keysHeld['k']) {
               if (boss.isHidden) {
@@ -3443,6 +4060,9 @@
             const earned = 1 + extraValue;
             savedData.coins += earned;
             coinsEarnedThisRun += earned;
+            if (activePowerups.doublePoints > 0) {
+              savedData.stats.orbsDuringDoublePoints = (savedData.stats.orbsDuringDoublePoints || 0) + 1;
+            }
           }
           if(!botplay) saveData();
 
@@ -3579,6 +4199,7 @@
             combo = 0;
             if (activePowerups.shield > 0) {
                 t.dead = true;
+                if (!botplay) { savedData.stats.shieldBlocks = (savedData.stats.shieldBlocks || 0) + 1; saveData(); }
                 emitPerfCue((t.x + player.x) / 2, (t.y + player.y) / 2, 'player-hit');
                 emitParticles(t.x, t.y, 20, '#00ffff', 200, 0.6, 2);
                 tone(800, 0.1, 'sine', 0.1);
@@ -3586,6 +4207,7 @@
                 ghostCharges--;
                 t.dead = true;
                 invulnTimer = 1.5;
+                if (!botplay) { savedData.stats.ghostRevives = (savedData.stats.ghostRevives || 0) + 1; saveData(); }
                 emitPerfCue(player.x, player.y, 'player-hit');
                 emitParticles(player.x, player.y, 30, '#00ffff', 250, 1.0, 3);
                 tone(600, 0.2, 'square', 0.2); // Shield break sound
@@ -4978,7 +5600,88 @@
         const a = (i + 1) / player.trail.length;
         const p1 = player.trail[i], p2 = player.trail[i+1];
 
-        if (type === 'rainbow') {
+        if (type === 'singularity') {
+            ctx.strokeStyle = `rgba(${currentSkinData.trail}, ${a * 0.5})`;
+            ctx.lineWidth = 1.5 + a * 2;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = '#9b5cff';
+            if (i % 4 === 0 && Math.random() < 0.5) {
+                ctx.save();
+                const ang = Math.random() * Math.PI * 2;
+                const dist = 14 + (i / player.trail.length) * 22;
+                ctx.strokeStyle = `rgba(${currentSkinData.trail}, ${a * 0.3})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(p1.x + Math.cos(ang) * dist, p1.y + Math.sin(ang) * dist);
+                ctx.lineTo(p1.x, p1.y);
+                ctx.stroke();
+                ctx.restore();
+            }
+            if (i % 6 === 0) {
+                ctx.save();
+                ctx.fillStyle = `rgba(20, 4, 40, ${a * 0.55})`;
+                ctx.beginPath();
+                ctx.arc(p1.x, p1.y, 5 + a * 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = `rgba(${currentSkinData.trail}, ${a * 0.5})`;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.restore();
+            }
+        } else if (type === 'coins') {
+            ctx.strokeStyle = `rgba(${currentSkinData.trail}, ${a * 0.35})`;
+            ctx.lineWidth = 1 + a * 3;
+            if (i % 5 === 0) {
+                ctx.save();
+                ctx.translate(p1.x, p1.y + (1 - a) * 10);
+                ctx.rotate((stateTime * 4 + i) % (Math.PI * 2));
+                ctx.fillStyle = `rgba(255, 220, 110, ${a * 0.8})`;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 3 + a * 2, 1.6 + a, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        } else if (type === 'zenith') {
+            ctx.strokeStyle = `rgba(${currentSkinData.trail}, ${a * 0.6})`;
+            const comboBoost = Math.min(1, combo / 20);
+            ctx.lineWidth = (2 + a * 5) * (1 + comboBoost * 0.8);
+            ctx.shadowBlur = 6 + comboBoost * 10;
+            ctx.shadowColor = currentSkinData.color;
+        } else if (type === 'obsidian') {
+            ctx.strokeStyle = `rgba(${Math.floor(30 + a * 40)}, ${Math.floor(10 + a * 12)}, ${Math.floor(10 + a * 8)}, ${a * 0.65})`;
+            ctx.lineWidth = a * 9;
+            if (Math.random() < 0.25) emitParticles(p1.x, p1.y, 1, '#ff5a2a', 90, 0.4, 1.2);
+            if (i % 6 === 0) {
+                ctx.save();
+                ctx.fillStyle = `rgba(255, ${Math.floor(90 + a * 80)}, 50, ${a * 0.55})`;
+                ctx.beginPath();
+                ctx.arc(p1.x, p1.y, 1.6 + a * 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        } else if (type === 'apex') {
+            ctx.strokeStyle = `rgba(${currentSkinData.trail}, ${a * 0.6})`;
+            ctx.lineWidth = 1 + Math.random() * 3;
+            if (Math.random() < 0.25) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(${currentSkinData.trail}, ${a * 0.7})`;
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p1.x + (Math.random()-0.5)*22, p1.y + (Math.random()-0.5)*22);
+                ctx.stroke();
+                ctx.restore();
+            }
+        } else if (type === 'binary') {
+            ctx.strokeStyle = `rgba(${currentSkinData.trail}, ${a * 0.3})`;
+            ctx.lineWidth = 2;
+            if (i % 3 === 0) {
+                ctx.save();
+                ctx.fillStyle = `rgba(${currentSkinData.trail}, ${a * 0.7})`;
+                ctx.font = '9px monospace';
+                ctx.fillText(Math.random() < 0.5 ? '0' : '1', p1.x + (Math.random()-0.5)*8, p1.y + (Math.random()-0.5)*8);
+                ctx.restore();
+            }
+        } else if (type === 'rainbow') {
             ctx.strokeStyle = `hsla(${(i * 20 + Date.now() * 0.1) % 360}, 80%, 70%, ${a * 0.7})`;
             ctx.lineWidth = a * 10;
             // Draw secondary rainbow line
@@ -5233,8 +5936,25 @@
     if (!activeScreen) return null;
     return activeScreen.id.replace('screen-', '');
   }
+  window.getActiveScreenName = getActiveScreenName;
+
+  // Pressing Backspace should visually "press" whichever back-key
+  // button is currently on screen too, so the keyboard and mouse paths
+  // feel like the same action rather than two unrelated ones.
+  function flashBackKeyPress() {
+    document.querySelectorAll('.back-key-btn').forEach(btn => {
+      if (btn.offsetParent === null) return; // skip ones not actually visible
+      btn.classList.add('pressed');
+      setTimeout(() => btn.classList.remove('pressed'), 140);
+    });
+  }
+  window.clickBackKey = function() {
+    handleQuitKey();
+  };
 
   window.handleQuitKey = function() {
+    flashBackKeyPress();
+
     // Don't stack overlays - if one's already open, Backspace does
     // nothing here (Cancel/Quit buttons handle closing it).
     if (document.getElementById('overlay-quit').classList.contains('active')) return;
@@ -5242,15 +5962,20 @@
     if (document.getElementById('overlay-updating').classList.contains('active')) return;
     if (document.getElementById('overlay-update-done').classList.contains('active')) return;
 
-    // --- ADDED THIS SECTION TO HANDLE SETTINGS CLOSING VIA BACKSPACE ---
+    // Settings overlay closes via Backspace too, same as everything else.
     if (document.getElementById('overlay-settings').classList.contains('active')) {
       window.closeSettingsOverlay();
       return;
     }
-    // ------------------------------------------------------------------
 
-    // Mid-run: do nothing at all.
-    if (state === 'playing' || state === 'dying') return;
+    // Mid-run: toggle pause instead of doing nothing. This is the one
+    // universal back/pause button now - P was removed so there's a
+    // single key for everything Backspace already does elsewhere.
+    if (state === 'playing' && !isBotplayActive()) {
+      togglePause();
+      return;
+    }
+    if (state === 'dying') return; // brief death animation, not pausable
 
     const activeScreen = getActiveScreenName();
 
@@ -5272,13 +5997,14 @@
     if (mode === 'app') {
       title.textContent = 'Quit Game?';
       msg.textContent = "You're about to exit Graveyard Slide.";
-      confirmBtn.textContent = 'QUIT GAME';
+      confirmBtn.textContent = 'QUIT';
     } else {
       title.textContent = 'Quit to Menu?';
       msg.textContent = 'Your current run will be lost.';
       confirmBtn.textContent = 'QUIT';
     }
     document.getElementById('overlay-quit').classList.add('active');
+    if (window.kbResetFocus) window.kbResetFocus('quit');
   }
   window.closeQuitOverlay = function() {
     document.getElementById('overlay-quit').classList.remove('active');
@@ -5289,32 +6015,13 @@
     updateVolumeUI();
     updatePerformanceUI();
     updateFpsUI();
+    updateButtonNumbersUI();
     document.getElementById('overlay-settings').classList.add('active');
+    if (window.kbResetFocus) window.kbResetFocus('settings');
   };
   window.closeSettingsOverlay = function() {
     document.getElementById('overlay-settings').classList.remove('active');
-  };
-// --- PASTE THE NEW RESTORE DEFAULTS FUNCTION HERE ---
-  window.restoreDefaults = function() {
-    savedData.musicVolume = 0.7;
-    savedData.sfxVolume = 0.7;
-    savedData.performanceMode = false;
-    savedData.showFps = false;
-
-    // Reset live audio mixing parameters
-    if (currentTrack) currentTrack.volume = 0.7;
-    if (masterGain) masterGain.gain.value = 0.5 * 0.7;
-
-    // Update system states and UI components
-    updateVolumeUI();
-    updatePerformanceUI();
-    updateFpsUI();
-
-    saveData();
-    if (typeof resize === 'function') resize(); // Re-render scaling if needed
-    
-    // Quick audio confirmation sound
-    if (typeof tone === 'function') tone(440, 0.15, 'triangle', 0.1); 
+    if (window.kbResetFocus) window.kbResetFocus(getActiveScreenName());
   };
   window.confirmQuitOverlay = async function() {
     document.getElementById('overlay-quit').classList.remove('active');
@@ -5366,6 +6073,14 @@
 
   window.addEventListener('DOMContentLoaded', async () => {
     if (!window.__TAURI__) return; // not running inside the Tauri app (e.g. browser preview)
+    // Small delay before any async work on launch: there's a known,
+    // open race condition in Tauri's underlying webview library (wry)
+    // on macOS where an in-flight async request during webview
+    // navigation can trigger a hard crash (see tauri-apps/tauri#12338).
+    // This doesn't eliminate the race, but gives the webview more time
+    // to finish settling before we start making requests, which
+    // reduces how often it gets hit in practice.
+    await new Promise(resolve => setTimeout(resolve, 600));
     try {
       const update = await window.__TAURI__.updater.check();
       if (update) {
@@ -5432,6 +6147,11 @@
   // the fact, on every normal startup, sidesteps that race entirely.
   window.addEventListener('DOMContentLoaded', async () => {
     if (!window.__TAURI__) return;
+    // Staggered slightly later than the update-check listener's 600ms
+    // delay above, so the two listeners' async work doesn't both fire
+    // at the exact same moment - see that comment for the underlying
+    // race-condition reason for the delay itself.
+    await new Promise(resolve => setTimeout(resolve, 900));
     try {
       const currentVersion = await window.__TAURI__.app.getVersion();
       const lastSeenVersion = savedData.lastSeenWhatsNewVersion || null;
@@ -5515,11 +6235,293 @@
   }
 </script>
 <script>
+  // ================================================================
+  //  GENERALISED KEYBOARD / NUMBER-KEY NAVIGATION
+  // ================================================================
+  //
+  //  Every "screen" is described by a KbContext descriptor that
+  //  records how its items are fetched, which axis the arrows move
+  //  on, and whether number keys are assigned. The dispatcher at the
+  //  bottom is screen-agnostic — it just resolves the active context,
+  //  reads the descriptor, and routes key events through the same
+  //  handful of helpers.
+  //
+  //  CONVENTION (applies to all future interactive screens):
+  //    • Space / Enter  →  confirm / activate the focused item
+  //    • Arrow keys     →  navigate (left-right for horizontal
+  //                         layouts, up-down for vertical lists)
+  //    • 1–9            →  jump-and-activate numbered items
+  //      (assigned automatically if count ≤ 9 and axis matches)
+  //
+  //  To add a new screen: add one entry to KB_CONTEXTS below.
+  // ================================================================
+
+  // ── context index (wrap-around position per context) ─────────────
+  const kbIdx = {};
+
+  // ── context descriptors ──────────────────────────────────────────
+  //   items:   fn → array of DOM el | {row, type, ...}
+  //   axis:    'x' | 'y'           (arrow direction)
+  //   numbers: true | false        (enable 1–N shortcut keys)
+  //   confirm: fn(item) called on Space/Enter  (default: item.click())
+  //   special: fn(e) optional; called first, return true to suppress default
+  const KB_CONTEXTS = {
+
+    loading: {
+      axis: null,
+      numbers: false,
+      items: () => [],
+      special(e) {
+        const ls = document.getElementById('screen-loading');
+        if (!ls || ls.getAttribute('data-ready') !== 'true') return true; // block if not ready
+        if (isConfirmKey(e) || e.key.startsWith('Arrow') ||
+            (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1)) {
+          e.preventDefault();
+          initGame();
+          return true;
+        }
+      }
+    },
+
+    quit: {
+      axis: 'x',
+      numbers: true,
+      items: () => Array.from(document.querySelectorAll('#overlay-quit .overlay-actions button')),
+    },
+
+    main: {
+      axis: 'y',
+      numbers: true,
+      items: () => Array.from(document.querySelectorAll('#screen-main > button')),
+    },
+
+    modes: {
+      axis: 'x',
+      numbers: true,
+      items: () => Array.from(document.querySelectorAll('#screen-modes .mode-card'))
+                     .filter(el => el.offsetParent !== null),
+    },
+
+    harmony: {
+      axis: 'y',
+      numbers: true,
+      items: () => Array.from(document.querySelectorAll('#screen-impossible button:not(.back-key-btn)')),
+    },
+
+    dead: {
+      axis: 'y',
+      numbers: true,
+      items: () => Array.from(document.querySelectorAll('#screen-dead button')),
+    },
+
+    shopUpgrades: {
+      axis: 'x',
+      numbers: false,
+      items: () => Array.from(document.querySelectorAll('#tab-upgrades .shop-card')),
+      confirm(item) { const b = item.querySelector('button'); if (b) b.click(); },
+      special(e) {
+        // Up / Down switches to skins tab
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault(); switchShopTab('skins'); return true;
+        }
+      }
+    },
+
+    shopSkins: {
+      axis: 'x',
+      numbers: false,
+      items: () => [],    // carousel, not a focus-list
+      special(e) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault(); cycleSkin(e.key === 'ArrowRight' ? 1 : -1); return true;
+        }
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+          e.preventDefault(); switchShopTab('upgrades'); return true;
+        }
+        if (isConfirmKey(e)) {
+          e.preventDefault();
+          const btn = document.querySelector('#skin-carousel-stage .skin-action');
+          if (btn) btn.click();
+          return true;
+        }
+      }
+    },
+
+    settings: {
+      axis: 'y',
+      numbers: false,
+      items() {
+        const rows = [];
+        const music = document.getElementById('music-volume-slider');
+        const sfx   = document.getElementById('sfx-volume-slider');
+        if (music) rows.push({ type: 'slider', row: music.closest('.settings-row-full'), input: music, setter: window.setMusicVolume });
+        if (sfx)   rows.push({ type: 'slider', row: sfx.closest('.settings-row-full'),   input: sfx,   setter: window.setSfxVolume });
+        const perf = document.getElementById('performance-toggle');
+        const fps  = document.getElementById('fps-toggle');
+        const nums = document.getElementById('numbers-toggle');
+        if (perf) rows.push({ type: 'toggle', row: perf.closest('.settings-row-full'), toggleFn: window.togglePerformanceMode });
+        if (fps)  rows.push({ type: 'toggle', row: fps.closest('.settings-row-full'),  toggleFn: window.toggleFpsCounter });
+        if (nums) rows.push({ type: 'toggle', row: nums.closest('.settings-row-full'), toggleFn: window.toggleButtonNumbers });
+        return rows;
+      },
+      confirm(item) {
+        if (item.type === 'toggle' && item.toggleFn) item.toggleFn();
+      },
+      special(e) {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          const items = KB_CONTEXTS.settings.items();
+          const item  = items[kbIdx.settings || 0];
+          if (item && item.type === 'slider') {
+            const next = Math.max(0, Math.min(100, parseInt(item.input.value, 10) + (e.key === 'ArrowRight' ? 5 : -5)));
+            item.input.value = next;
+            if (item.setter) item.setter(next);
+          }
+          return true;
+        }
+      }
+    },
+  };
+
+  // ── helpers ──────────────────────────────────────────────────────
+
+  function isConfirmKey(e) {
+    return e.key === ' ' || e.code === 'Space' || e.key === 'Enter';
+  }
+
+  function settingsOverlayOpen() {
+    const el = document.getElementById('overlay-settings');
+    return !!el && el.classList.contains('active');
+  }
+
+  function quitOverlayOpen() {
+    const el = document.getElementById('overlay-quit');
+    return !!el && el.classList.contains('active');
+  }
+
+  function loadingScreenActive() {
+    const el = document.getElementById('screen-loading');
+    return !!el && el.classList.contains('active');
+  }
+
+  function shopOnSkinsTab() {
+    const t = document.getElementById('tab-skins');
+    return !!t && t.style.display !== 'none';
+  }
+
+  function resolveKbContext() {
+    if (loadingScreenActive()) return 'loading';
+    if (quitOverlayOpen())     return 'quit';
+    if (settingsOverlayOpen()) return 'settings';
+    const screen = getActiveScreenName();
+    if (screen === 'modes')     return 'modes';
+    if (screen === 'impossible')return 'harmony';
+    if (screen === 'dead')      return 'dead';
+    if (screen === 'shop')      return shopOnSkinsTab() ? 'shopSkins' : 'shopUpgrades';
+    if (screen === 'main')      return 'main';
+    return null;
+  }
+
+  function clearKbFocus() {
+    document.querySelectorAll('.kb-focus').forEach(el => el.classList.remove('kb-focus'));
+  }
+
+  function applyKbFocus() {
+    clearKbFocus();
+    const ctxName = resolveKbContext();
+    if (!ctxName) return;
+    const ctx = KB_CONTEXTS[ctxName];
+    if (!ctx) return;
+    const items = ctx.items();
+    if (!items.length) return;
+    if (!kbIdx[ctxName]) kbIdx[ctxName] = 0;
+    kbIdx[ctxName] = Math.max(0, Math.min(items.length - 1, kbIdx[ctxName]));
+    const item = items[kbIdx[ctxName]];
+    const target = item && item.row ? item.row : item;
+    if (target) target.classList.add('kb-focus');
+  }
+  window.kbApplyFocus = applyKbFocus;
+
+  // Called whenever we switch screens so focus resets to item 0.
+  window.kbResetFocus = function(screenHint) {
+    const ctxName = resolveKbContext();
+    if (!ctxName) { clearKbFocus(); return; }
+    kbIdx[ctxName] = 0;
+    applyKbFocus();
+  };
+
+  function kbActivate(ctxName) {
+    const ctx   = KB_CONTEXTS[ctxName];
+    const items = ctx.items();
+    const item  = items[kbIdx[ctxName] || 0];
+    if (!item) return;
+    if (ctx.confirm) { ctx.confirm(item); return; }
+    if (item.click) item.click();
+  }
+
+  function kbMove(ctxName, delta) {
+    const items = KB_CONTEXTS[ctxName].items();
+    if (!items.length) return;
+    if (!kbIdx[ctxName]) kbIdx[ctxName] = 0;
+    kbIdx[ctxName] = (kbIdx[ctxName] + delta + items.length) % items.length;
+    applyKbFocus();
+  }
+
+  // ── main keydown handler ─────────────────────────────────────────
+
   window.addEventListener('keydown', (e) => {
     if (e.key === 'F5' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r')) {
-      e.preventDefault();
+      e.preventDefault(); return;
     }
   });
+
+  window.addEventListener('keydown', (e) => {
+    // Never intercept standard browser shortcuts
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    // Gameplay: only let settings overlay steal keys
+    if (typeof state !== 'undefined' && state === 'playing' && !settingsOverlayOpen() && !quitOverlayOpen()) return;
+
+    const ctxName = resolveKbContext();
+    if (!ctxName) return;
+    const ctx = KB_CONTEXTS[ctxName];
+    if (!ctx) return;
+
+    // Give context a chance to handle fully custom keys first
+    if (ctx.special && ctx.special(e)) return;
+
+    const items = ctx.items();
+
+    // Confirm / activate
+    if (isConfirmKey(e)) {
+      e.preventDefault();
+      kbActivate(ctxName);
+      return;
+    }
+
+    // Arrow navigation along the declared axis
+    const isForward  = ctx.axis === 'x' ? e.key === 'ArrowRight' : e.key === 'ArrowDown';
+    const isBackward = ctx.axis === 'x' ? e.key === 'ArrowLeft'  : e.key === 'ArrowUp';
+    if ((isForward || isBackward) && ctx.axis) {
+      e.preventDefault();
+      kbMove(ctxName, isForward ? 1 : -1);
+      return;
+    }
+
+    // Number-key shortcuts: press N to jump to and activate item N
+    if (ctx.numbers && items.length > 0 && items.length <= 9) {
+      const n = parseInt(e.key, 10);
+      if (!isNaN(n) && n >= 1 && n <= items.length) {
+        e.preventDefault();
+        kbIdx[ctxName] = n - 1;
+        applyKbFocus();
+        // Slight delay so the focus highlight is visible before action fires
+        setTimeout(() => kbActivate(ctxName), 60);
+        return;
+      }
+    }
+  });
+
   window.addEventListener('contextmenu', (e) => e.preventDefault());
 </script>
 </body>
